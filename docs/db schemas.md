@@ -10,7 +10,7 @@ CREATE TABLE compliance_documents (
     document_id TEXT NOT NULL,              -- Logical document identifier
     chunk_id TEXT NOT NULL,                 -- Unique chunk identifier
     content TEXT NOT NULL,                  -- Chunk text content
-    embedding vector(1536),                 -- OpenAI ada-002 dimension
+    embedding vector(1024),                 -- Ollama mxbai-embed-large dimension
     metadata JSONB,                         -- Flexible metadata
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW(),

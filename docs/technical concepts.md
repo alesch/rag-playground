@@ -19,6 +19,7 @@ Retrieval-Augmented Generation combines information retrieval with language gene
 - Similar text → Similar vectors (closer in vector space)
 - Enables semantic search beyond keyword matching
 - Dimension typically 384-1536 (depends on model)
+- **This project uses**: Ollama mxbai-embed-large (1024 dimensions)
 
 ### 3. Chunking Strategies
 

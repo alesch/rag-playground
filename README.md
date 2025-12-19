@@ -28,11 +28,12 @@
 ### Technology Stack
 
 - **Database**: Supabase (PostgreSQL + pgvector extension)
-- **Embeddings**: OpenAI text-embedding-3-small (or open-source alternatives)
-- **LLM**: OpenAI GPT-4 / GPT-3.5-turbo (or open-source alternatives)
+- **Embeddings**: Ollama mxbai-embed-large (1024 dimensions)
+- **LLM**: Ollama llama3.1 (or other local models like mistral, phi3)
 - **Framework**: LangChain + LangGraph
 - **Language**: Python 3.11+
 - **Development**: Jupyter notebooks for pedagogical exploration
+- **Local LLM Runtime**: Ollama (free, no API keys required)
 
 ## Success Criteria
 
@@ -53,6 +54,20 @@
 - 5 educational Jupyter notebooks
 - Demo corpus and sample questionnaire
 - Evaluation report with metrics
+
+## Documentation
+
+Detailed documentation is available in the `docs/` folder:
+
+- **architecture.md** - Core components and technology stack overview
+- **corpus structure.md** - Demo corpus, facts about the system.
+- **db schemas.md** - PostgreSQL/pgvector database schema and metadata structure
+- **evaluation metrics.md** - Retrieval and generation quality metrics for RAG system evaluation
+- **folder structure.md** - Complete project directory structure and file organization
+- **learning path.md** - Jupyter notebook modules covering database setup, ingestion, retrieval, generation, and orchestration
+- **project_plan.md** - workflow from setup to refinement
+- **sample questions.md** - Test questions covering security, technical, and compliance topics
+- **technical concepts.md** - Key RAG concepts including embeddings, chunking strategies, and prompt engineering
 
 ## Notes
 
