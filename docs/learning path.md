@@ -18,7 +18,7 @@
 **Learning Objectives**:
 - Load markdown documents
 - Implement chunking strategies (semantic vs fixed-size)
-- Generate embeddings using OpenAI API
+- Generate embeddings using Ollama (langchain-ollama)
 - Store vectors in pgvector with metadata
 
 **Topics Covered**:
