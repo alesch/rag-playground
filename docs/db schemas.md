@@ -1,0 +1,43 @@
+## Database Schema
+
+### Table: `compliance_documents`
+
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE compliance_documents (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    document_id TEXT NOT NULL,              -- Logical document identifier
+    chunk_id TEXT NOT NULL,                 -- Unique chunk identifier
+    content TEXT NOT NULL,                  -- Chunk text content
+    embedding vector(1536),                 -- OpenAI ada-002 dimension
+    metadata JSONB,                         -- Flexible metadata
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(document_id, chunk_id)
+);
+
+-- Create index for vector similarity search
+CREATE INDEX ON compliance_documents 
+USING ivfflat (embedding vector_cosine_ops)
+WITH (lists = 100);
+
+-- Create indexes for metadata filtering
+CREATE INDEX idx_document_id ON compliance_documents(document_id);
+CREATE INDEX idx_metadata ON compliance_documents USING gin(metadata);
+```
+
+### Metadata Schema
+
+```json
+{
+    "source_file": "01_technical_infrastructure.md",
+    "document_type": "technical",
+    "section": "Security Controls",
+    "subsection": "Authentication",
+    "tags": ["security", "authentication", "mfa"],
+    "last_updated": "2024-01-15",
+    "chunk_index": 0,
+    "total_chunks": 5
+}
+```
