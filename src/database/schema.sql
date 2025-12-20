@@ -1,5 +1,5 @@
--- Enable pgvector extension
-CREATE EXTENSION IF NOT EXISTS vector;
+-- Enable pgvector extension in extensions schema
+CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA extensions;
 
 -- Create compliance_documents table
 CREATE TABLE IF NOT EXISTS compliance_documents (
