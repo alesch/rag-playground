@@ -5,7 +5,7 @@ Loads markdown documents from filesystem and extracts YAML frontmatter metadata.
 """
 
 from pathlib import Path
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, List
 from dataclasses import dataclass
 import re
 import yaml
@@ -97,3 +97,30 @@ def load_document(file_path: Path) -> Document:
         content=document_content,
         metadata=metadata
     )
+
+
+def load_corpus(corpus_path: Path) -> List[Document]:
+    """
+    Load all markdown documents from a corpus directory.
+    
+    Args:
+        corpus_path: Path to the directory containing markdown files
+        
+    Returns:
+        List of Document objects
+        
+    Raises:
+        FileNotFoundError: If corpus_path does not exist
+    """
+    if not corpus_path.exists():
+        raise FileNotFoundError(f"Corpus path not found: {corpus_path}")
+    
+    if not corpus_path.is_dir():
+        raise ValueError(f"Corpus path must be a directory: {corpus_path}")
+    
+    documents = []
+    for md_file in corpus_path.glob("*.md"):
+        document = load_document(md_file)
+        documents.append(document)
+    
+    return documents

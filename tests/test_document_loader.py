@@ -7,7 +7,7 @@ of frontmatter metadata.
 
 import pytest
 from pathlib import Path
-from src.ingestion.document_loader import load_document
+from src.ingestion.document_loader import load_document, load_corpus
 
 
 def test_load_single_file_extracts_frontmatter():
@@ -40,3 +40,23 @@ def test_generate_document_id_from_title():
     assert document.document_id == "technical-infrastructure-documentation"
     assert document.document_id.islower()
     assert " " not in document.document_id
+
+
+def test_load_all_corpus_documents():
+    """Test loading all documents from the corpus directory."""
+    # Given
+    corpus_path = Path("data/corpus")
+    
+    # When
+    documents = load_corpus(corpus_path)
+    
+    # Then
+    assert len(documents) == 4  # We have 4 markdown files in corpus
+    assert all(isinstance(doc.document_id, str) for doc in documents)
+    assert all(doc.content for doc in documents)
+    assert all(doc.metadata for doc in documents)
+    
+    # Verify all documents have required metadata
+    for doc in documents:
+        assert "version" in doc.metadata
+        assert "title" in doc.metadata
