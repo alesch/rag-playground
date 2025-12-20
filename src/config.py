@@ -1,0 +1,132 @@
+"""
+Centralized configuration management for the Complaila RAG system.
+
+This module loads environment variables and defines configuration parameters
+for all components of the system.
+"""
+
+import os
+import logging
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Project root directory
+PROJECT_ROOT = Path(__file__).parent.parent
+
+# ============================================================================
+# Logging Configuration
+# ============================================================================
+
+LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Single logger for all modules
+logging.basicConfig(level=LOG_LEVEL, format=LOG_FORMAT)
+logger = logging.getLogger("complaila")
+
+# ============================================================================
+# Supabase Configuration
+# ============================================================================
+
+SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
+SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
+
+# ============================================================================
+# Ollama Configuration
+# ============================================================================
+
+OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+OLLAMA_EMBEDDING_MODEL: str = os.getenv("OLLAMA_EMBEDDING_MODEL", "mxbai-embed-large")
+OLLAMA_CHAT_MODEL: str = os.getenv("OLLAMA_CHAT_MODEL", "llama3.1")
+
+# Embedding dimensions for mxbai-embed-large
+EMBEDDING_DIMENSIONS: int = 1024
+
+# ============================================================================
+# Document Ingestion Configuration
+# ============================================================================
+
+# Path to corpus documents
+CORPUS_PATH: Path = PROJECT_ROOT / "data" / "corpus"
+
+# Chunking parameters
+CHUNK_SIZE: int = 800  # Target tokens per chunk (500-1000 range)
+CHUNK_OVERLAP: int = 100  # Overlap between chunks to maintain context
+MIN_CHUNK_SIZE: int = 100  # Minimum chunk size to avoid too-small fragments
+
+# ============================================================================
+# Database Configuration
+# ============================================================================
+
+# Table name for storing document chunks
+CHUNKS_TABLE: str = "document_chunks"
+
+# Batch size for database operations
+DB_BATCH_SIZE: int = 50
+
+# ============================================================================
+# Validation
+# ============================================================================
+
+def validate_config() -> bool:
+    """
+    Validate that all required configuration is present and valid.
+    
+    Returns:
+        True if configuration is valid
+        
+    Raises:
+        ValueError: If configuration is invalid
+    """
+    errors = []
+    
+    # Check Supabase credentials
+    if not SUPABASE_URL or SUPABASE_URL == "your_supabase_project_url":
+        errors.append("SUPABASE_URL not configured")
+    
+    if not SUPABASE_KEY or SUPABASE_KEY == "your_supabase_anon_key":
+        errors.append("SUPABASE_KEY not configured")
+    
+    # Check corpus path exists
+    if not CORPUS_PATH.exists():
+        errors.append(f"Corpus path does not exist: {CORPUS_PATH}")
+    
+    # Check chunking parameters
+    if CHUNK_SIZE < MIN_CHUNK_SIZE:
+        errors.append(f"CHUNK_SIZE ({CHUNK_SIZE}) must be >= MIN_CHUNK_SIZE ({MIN_CHUNK_SIZE})")
+    
+    if CHUNK_OVERLAP >= CHUNK_SIZE:
+        errors.append(f"CHUNK_OVERLAP ({CHUNK_OVERLAP}) must be < CHUNK_SIZE ({CHUNK_SIZE})")
+    
+    if errors:
+        raise ValueError("Configuration validation failed:\n" + "\n".join(f"  - {e}" for e in errors))
+    
+    return True
+
+
+if __name__ == "__main__":
+    # Test configuration when run directly
+    print("=== Complaila Configuration ===\n")
+    print(f"Project Root: {PROJECT_ROOT}")
+    print(f"Corpus Path: {CORPUS_PATH}")
+    print(f"\nSupabase URL: {SUPABASE_URL[:30]}...")
+    print(f"Supabase Key: {'*' * 20}")
+    print(f"\nOllama Base URL: {OLLAMA_BASE_URL}")
+    print(f"Embedding Model: {OLLAMA_EMBEDDING_MODEL}")
+    print(f"Chat Model: {OLLAMA_CHAT_MODEL}")
+    print(f"Embedding Dimensions: {EMBEDDING_DIMENSIONS}")
+    print(f"\nChunk Size: {CHUNK_SIZE}")
+    print(f"Chunk Overlap: {CHUNK_OVERLAP}")
+    print(f"Min Chunk Size: {MIN_CHUNK_SIZE}")
+    print(f"\nDatabase Table: {CHUNKS_TABLE}")
+    print(f"Batch Size: {DB_BATCH_SIZE}")
+    print(f"\nLog Level: {LOG_LEVEL}")
+    
+    try:
+        validate_config()
+        print("\n✅ Configuration is valid!")
+    except ValueError as e:
+        print(f"\n❌ Configuration validation failed:\n{e}")
