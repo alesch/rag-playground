@@ -1,4 +1,10 @@
-# Operational Procedures Documentation
+---
+version: 1
+title: Operational Procedures & Policies
+tags: [operations, incident-response, change-management, vendors]
+---
+
+# Operational Procedures & Policies
 
 ## Incident Response Plan
 

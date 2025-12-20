@@ -1,4 +1,10 @@
-# SOC 2 Type II Compliance Documentation
+---
+version: 1
+title: SOC 2 Compliance Documentation
+tags: [compliance, soc2, security, audit]
+---
+
+# SOC 2 Compliance Documentation
 
 ## Overview
 

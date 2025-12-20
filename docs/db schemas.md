@@ -9,12 +9,14 @@ CREATE TABLE compliance_documents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     document_id TEXT NOT NULL,              -- Logical document identifier
     chunk_id TEXT NOT NULL,                 -- Unique chunk identifier
+    revision INTEGER NOT NULL,              -- Document revision number
+    status TEXT NOT NULL DEFAULT 'active',  -- Status: 'active', 'superseded', 'archived'
     content TEXT NOT NULL,                  -- Chunk text content
     embedding vector(1024),                 -- Ollama mxbai-embed-large dimension
     metadata JSONB,                         -- Flexible metadata
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW(),
-    UNIQUE(document_id, chunk_id)
+    UNIQUE(document_id, chunk_id, revision)
 );
 
 -- Create index for vector similarity search
@@ -38,6 +40,7 @@ CREATE INDEX idx_metadata ON compliance_documents USING gin(metadata);
     "tags": ["security", "authentication", "mfa"],
     "last_updated": "2024-01-15",
     "chunk_index": 0,
-    "total_chunks": 5
+    "total_chunks": 5,
+    "revision_note": "Added MFA implementation details"
 }
 ```

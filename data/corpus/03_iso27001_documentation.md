@@ -1,4 +1,10 @@
-# ISO 27001 Certification Documentation
+---
+version: 1
+title: ISO 27001 Compliance Documentation
+tags: [compliance, iso27001, security, isms]
+---
+
+# ISO 27001 Compliance Documentation
 
 ## Overview
 

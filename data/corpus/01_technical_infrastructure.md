@@ -1,3 +1,9 @@
+---
+version: 1
+title: Technical Infrastructure Documentation
+tags: [technical, infrastructure, azure, security]
+---
+
 # Technical Infrastructure Documentation
 
 ## System Architecture Overview
