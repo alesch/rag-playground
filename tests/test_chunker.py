@@ -205,3 +205,33 @@ def test_respect_maximum_chunk_size():
     # Metadata should be preserved in all sub-chunks
     for chunk in chunks:
         assert chunk.metadata.get("Header2") == "Long Section"
+
+
+def test_no_overlap_at_natural_header_boundaries():
+    """Test that header-based splits don't create wasteful overlap."""
+    # Given - Two distinct sections with unique content
+    content = """## Section Alpha
+Unique content A that appears only in section alpha.
+## Section Beta
+Unique content B that appears only in section beta."""
+    document = Document(document_id="test", content=content, metadata={})
+    
+    # When
+    chunks = chunk_document(document, chunk_overlap=100)
+    
+    # Then
+    assert len(chunks) == 2
+    
+    # Verify Section Alpha content is ONLY in chunk 0
+    assert "Unique content A" in chunks[0].content
+    assert "Unique content A" not in chunks[1].content, "Section Alpha content leaked into Section Beta chunk"
+    
+    # Verify Section Beta content is ONLY in chunk 1
+    assert "Unique content B" in chunks[1].content
+    assert "Unique content B" not in chunks[0].content, "Section Beta content leaked into Section Alpha chunk"
+    
+    # Headers should not appear in wrong chunks
+    assert "Section Alpha" in chunks[0].content
+    assert "Section Alpha" not in chunks[1].content
+    assert "Section Beta" in chunks[1].content
+    assert "Section Beta" not in chunks[0].content
