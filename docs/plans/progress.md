@@ -1,7 +1,7 @@
 # Phase 2 TDD Progress Tracker
 
 **Last Updated**: 2025-12-20  
-**Current Status**: Document Loader COMPLETE ✅
+**Current Status**: Chunker COMPLETE ✅
 
 ---
 
@@ -34,35 +34,60 @@ Completed tests:
 
 ---
 
-## Next Up: Component 2 - Chunker 🔜
-
+### Component 2: Chunker ✅
 **Module**: `src/ingestion/chunker.py`  
 **Test File**: `tests/test_chunker.py`  
-**Status**: Not started
+**Status**: All tests passing (12/12)
 
-Upcoming tests (in order):
-1. Split document by markdown headers preserving context
-2. Respect maximum chunk size limit
-3. Apply overlap between consecutive chunks
-4. Generate unique chunk IDs and preserve revision in metadata
-5. Handle minimum chunk size constraint
+Completed tests:
+1. ✅ Split document by markdown headers preserving context
+2. ✅ Respect maximum chunk size limit
+3. ✅ Apply overlap between consecutive chunks (verified no wasteful overlap at natural boundaries)
+4. ✅ Generate unique chunk IDs and preserve revision in metadata
+5. ⏭️ Handle minimum chunk size constraint (skipped - not needed with LangChain)
 
-**What to do next**:
-1. Start RED phase: Write first test in `tests/test_chunker.py` for "Split document by markdown headers preserving context"
-2. Run test to confirm it fails
-3. GREEN phase: Implement minimal code to pass the test
-4. REFACTOR phase: Clean up code if needed
-5. Commit changes
-6. Move to next test
+**Additional tests added**:
+- Split at level 2 (##) and level 3 (###) headers
+- Level 1 (#) headers don't trigger splits
+- Consecutive headers handling
+- Empty documents
+- Documents without headers
+- Header hierarchy preservation in metadata
+
+**Key Implementation Details**:
+- Replaced custom implementation with LangChain's `MarkdownHeaderTextSplitter` and `RecursiveCharacterTextSplitter`
+- Two-phase approach: split by headers first, then enforce size limits
+- Chunk dataclass with `chunk_id`, `content`, and `metadata` fields
+- Unique, deterministic chunk IDs using hash + index
+- Preserves header hierarchy (Header2, Header3) in metadata
+- Preserves `document_id` and `revision` from document metadata
+- Default: 4000 char max chunk size (~1000 tokens), 200 char overlap
+- Well-refactored code with 7 helper functions, main function only 7 lines
+
+**Latest Commits**:
+- 8761bdf: Extract splitter initialization
+- d733101: Add test for maximum chunk size enforcement
+- 58d48ae: Add test verifying no overlap at natural header boundaries
+- 839c224: Add metadata support to preserve header hierarchy
+- 2f3ca4e: Add unit tests and refactor chunker
+
+---
+
+## Next Up: Component 3 - Embedder 🔜
 
 ---
 
 ## Remaining Components
 
-### Component 3: Embedder
 **Module**: `src/ingestion/embedder.py`  
 **Test File**: `tests/test_embedder.py`  
 **Status**: Not started
+
+Upcoming tests:
+1. Generate 1024-dimensional embedding for text via Ollama
+2. Batch embed multiple texts maintaining order
+3. Raise error when Ollama service unavailable
+4. Validate and reject empty input text
 
 ### Component 4: Supabase Client
 **Module**: `src/database/supabase_client.py`  
