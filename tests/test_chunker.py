@@ -64,7 +64,7 @@ Content B"""
 
 
 def test_no_split_at_level_1_headers():
-    """Test that document does NOT split at # headers but does split at ##."""
+    """Test that document does NOT split at # headers."""
     # Given
     content = """# Title
 ## Section 1
@@ -75,11 +75,36 @@ Content A"""
     chunks = chunk_document(document)
     
     # Then
-    # Level 1 header stays in first chunk (no split), but ## does trigger split
+    # Level 1 headers are preserved but don't trigger splits
+    # All content stays together since ## is the split point
+    assert len(chunks) == 1
+    assert "# Title" in chunks[0].content
+    assert "## Section 1" in chunks[0].content
+    assert "Content A" in chunks[0].content
+
+
+def test_level_1_header_with_multiple_level_2_sections():
+    """Test that # header is included with first ## section, then splits at subsequent ##."""
+    # Given
+    content = """# Title
+## Section 1
+Content A
+## Section 2
+Content B"""
+    document = Document(document_id="test", content=content, metadata={})
+    
+    # When
+    chunks = chunk_document(document)
+    
+    # Then
     assert len(chunks) == 2
-    assert chunks[0].content == "# Title"
-    assert "## Section 1" in chunks[1].content
-    assert "Content A" in chunks[1].content
+    # First chunk should have # Title and ## Section 1
+    assert "# Title" in chunks[0].content
+    assert "## Section 1" in chunks[0].content
+    assert "Content A" in chunks[0].content
+    # Second chunk should have ## Section 2
+    assert "## Section 2" in chunks[1].content
+    assert "Content B" in chunks[1].content
 
 
 def test_consecutive_headers():
@@ -127,3 +152,32 @@ at all."""
     # Then
     assert len(chunks) == 1
     assert chunks[0].content == content
+
+
+def test_preserve_header_hierarchy_in_metadata():
+    """Test that chunks preserve parent header hierarchy in metadata."""
+    # Given
+    content = """## Security Controls
+### Authentication
+MFA required for all accounts.
+### Encryption
+AES-256 encryption at rest."""
+    document = Document(document_id="test", content=content, metadata={})
+    
+    # When
+    chunks = chunk_document(document)
+    
+    # Then
+    assert len(chunks) == 2
+    
+    # First chunk: Authentication section
+    assert "Authentication" in chunks[0].content
+    assert "Header2" in chunks[0].metadata
+    assert chunks[0].metadata["Header2"] == "Security Controls"
+    assert "Header3" in chunks[0].metadata
+    assert chunks[0].metadata["Header3"] == "Authentication"
+    
+    # Second chunk: Encryption section
+    assert "Encryption" in chunks[1].content
+    assert chunks[1].metadata["Header2"] == "Security Controls"
+    assert chunks[1].metadata["Header3"] == "Encryption"

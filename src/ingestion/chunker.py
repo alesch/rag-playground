@@ -1,75 +1,84 @@
 """
 Document chunker for splitting markdown documents by headers.
 
-Splits documents into chunks based on markdown header structure while
-preserving context through header hierarchy.
+Uses LangChain's MarkdownHeaderTextSplitter for intelligent chunking
+with header context preservation and size limits.
 """
 
-import re
 from dataclasses import dataclass
 from typing import List
+from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
 from src.ingestion.document_loader import Document
 
 
 @dataclass
 class Chunk:
-    """Represents a chunk of a document."""
+    """Represents a chunk of a document with header hierarchy metadata."""
     
     content: str
+    metadata: dict
 
 
-def _is_header(line: str) -> bool:
+def chunk_document(
+    document: Document,
+    max_chunk_size: int = 4000,
+    chunk_overlap: int = 200
+) -> List[Chunk]:
     """
-    Check if a line is a markdown header (## or ###).
+    Split a document into chunks using LangChain's markdown-aware splitter.
     
-    Args:
-        line: Line to check
-        
-    Returns:
-        True if line is a header at level 2 or 3
-    """
-    return bool(re.match(r'^#{2,3}\s+', line))
-
-
-def _save_chunk(chunks: List[Chunk], current_chunk: List[str]) -> None:
-    """
-    Save accumulated lines as a chunk if content exists.
-    
-    Args:
-        chunks: List to append the chunk to
-        current_chunk: Lines accumulated for current chunk
-    """
-    chunk_text = "\n".join(current_chunk).strip()
-    if chunk_text:
-        chunks.append(Chunk(content=chunk_text))
-
-
-def chunk_document(document: Document) -> List[Chunk]:
-    """
-    Split a document into chunks based on markdown headers.
+    Two-phase approach:
+    1. Split by markdown headers (## and ###) to preserve structure
+    2. Further split oversized chunks to respect max_chunk_size
     
     Args:
         document: Document to chunk
+        max_chunk_size: Maximum characters per chunk (~1000 tokens)
+        chunk_overlap: Character overlap between chunks for context
         
     Returns:
         List of Chunk objects
     """
-    content = document.content
+    # Phase 1: Split by headers
+    headers_to_split_on = [
+        ("##", "Header2"),
+        ("###", "Header3"),
+    ]
+    
+    markdown_splitter = MarkdownHeaderTextSplitter(
+        headers_to_split_on=headers_to_split_on,
+        strip_headers=False  # Keep headers in content for context
+    )
+    
+    # Phase 2: Enforce size limits
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=max_chunk_size,
+        chunk_overlap=chunk_overlap,
+        length_function=len,
+    )
+    
+    # Apply both splitters
+    header_splits = markdown_splitter.split_text(document.content)
+    
+    # If no header splits (document without headers), split by size only
+    if not header_splits:
+        final_splits = text_splitter.split_text(document.content)
+        return [Chunk(content=text, metadata={}) for text in final_splits if text.strip()]
+    
+    # Further split large chunks
     chunks = []
-    
-    # Split by markdown headers (## and ###)
-    # Pattern matches lines starting with ## or ###
-    lines = content.split("\n")
-    current_chunk = []
-    
-    for line in lines:
-        if _is_header(line):
-            _save_chunk(chunks, current_chunk)
-            current_chunk = []
+    for doc in header_splits:
+        # LangChain returns Document objects with page_content and metadata
+        content = doc.page_content if hasattr(doc, 'page_content') else str(doc)
+        metadata = doc.metadata if hasattr(doc, 'metadata') else {}
         
-        current_chunk.append(line)
-    
-    # Add final chunk
-    _save_chunk(chunks, current_chunk)
+        # Split if too large
+        if len(content) > max_chunk_size:
+            sub_chunks = text_splitter.split_text(content)
+            # Preserve metadata in sub-chunks
+            chunks.extend([Chunk(content=text, metadata=metadata) for text in sub_chunks if text.strip()])
+        else:
+            if content.strip():
+                chunks.append(Chunk(content=content, metadata=metadata))
     
     return chunks
