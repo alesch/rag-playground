@@ -181,3 +181,27 @@ AES-256 encryption at rest."""
     assert "Encryption" in chunks[1].content
     assert chunks[1].metadata["Header2"] == "Security Controls"
     assert chunks[1].metadata["Header3"] == "Encryption"
+
+
+def test_respect_maximum_chunk_size():
+    """Test that chunks respect the maximum size limit."""
+    # Given - Create a section with very long content that exceeds max size
+    long_content = "A" * 5000  # 5000 characters
+    content = f"## Long Section\n{long_content}"
+    document = Document(document_id="test", content=content, metadata={})
+    max_size = 1000  # Set max to 1000 characters
+    
+    # When
+    chunks = chunk_document(document, max_chunk_size=max_size)
+    
+    # Then
+    # Should split into multiple chunks
+    assert len(chunks) > 1, "Long content should be split into multiple chunks"
+    
+    # Each chunk should respect the max size
+    for i, chunk in enumerate(chunks):
+        assert len(chunk.content) <= max_size, f"Chunk {i} size {len(chunk.content)} exceeds max {max_size}"
+    
+    # Metadata should be preserved in all sub-chunks
+    for chunk in chunks:
+        assert chunk.metadata.get("Header2") == "Long Section"
