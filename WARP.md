@@ -5,6 +5,7 @@
 - [README.md](README.md) - Project overview
 - [docs/architecture.md](docs/architecture.md) - System architecture and components
 - [docs/project_plan.md](docs/project_plan.md) - Development workflow and phases
+- [docs/plans/progress.md](docs/plans/progress.md) - Current progress tracker
 
 ## Development Workflow
 
