@@ -13,3 +13,7 @@ langchain-community>=0.3.0
 # Utilities
 python-dotenv>=1.0.0
 jupyter>=1.0.0
+python-frontmatter>=1.0.0
+
+# Testing
+pytest>=7.0.0
