@@ -60,3 +60,41 @@ def test_load_all_corpus_documents():
     for doc in documents:
         assert "version" in doc.metadata
         assert "title" in doc.metadata
+
+
+def test_raise_error_when_version_missing():
+    """Test that an error is raised when version field is missing."""
+    # Given - create a temporary file without version
+    import tempfile
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+        f.write("---\n")
+        f.write("title: Test Document\n")
+        f.write("---\n")
+        f.write("# Content\n")
+        temp_path = Path(f.name)
+    
+    try:
+        # When/Then
+        with pytest.raises(ValueError, match="Missing required frontmatter field: version"):
+            load_document(temp_path)
+    finally:
+        temp_path.unlink()
+
+
+def test_raise_error_when_title_missing():
+    """Test that an error is raised when title field is missing."""
+    # Given - create a temporary file without title
+    import tempfile
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+        f.write("---\n")
+        f.write("version: 1\n")
+        f.write("---\n")
+        f.write("# Content\n")
+        temp_path = Path(f.name)
+    
+    try:
+        # When/Then
+        with pytest.raises(ValueError, match="Missing required frontmatter field: title"):
+            load_document(temp_path)
+    finally:
+        temp_path.unlink()

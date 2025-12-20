@@ -80,7 +80,7 @@ def load_document(file_path: Path) -> Document:
         
     Raises:
         FileNotFoundError: If file does not exist
-        ValueError: If frontmatter is malformed
+        ValueError: If frontmatter is malformed or missing required fields
     """
     if not file_path.exists():
         raise FileNotFoundError(f"File not found: {file_path}")
@@ -88,8 +88,14 @@ def load_document(file_path: Path) -> Document:
     content = file_path.read_text()
     metadata, document_content = _parse_frontmatter(content)
     
+    # Validate required fields
+    if 'version' not in metadata:
+        raise ValueError("Missing required frontmatter field: version")
+    if 'title' not in metadata:
+        raise ValueError("Missing required frontmatter field: title")
+    
     # Generate document_id from title
-    title = metadata.get('title', '')
+    title = metadata['title']
     document_id = _slugify(title)
     
     return Document(
