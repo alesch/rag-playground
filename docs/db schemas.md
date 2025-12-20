@@ -1,11 +1,11 @@
 ## Database Schema
 
-### Table: `compliance_documents`
+### Table: `document_chunks`
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 
-CREATE TABLE compliance_documents (
+CREATE TABLE document_chunks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     document_id TEXT NOT NULL,              -- Logical document identifier
     chunk_id TEXT NOT NULL,                 -- Unique chunk identifier
@@ -20,13 +20,13 @@ CREATE TABLE compliance_documents (
 );
 
 -- Create index for vector similarity search
-CREATE INDEX ON compliance_documents 
+CREATE INDEX ON document_chunks 
 USING ivfflat (embedding vector_cosine_ops)
 WITH (lists = 100);
 
 -- Create indexes for metadata filtering
-CREATE INDEX idx_document_id ON compliance_documents(document_id);
-CREATE INDEX idx_metadata ON compliance_documents USING gin(metadata);
+CREATE INDEX idx_document_id ON document_chunks(document_id);
+CREATE INDEX idx_metadata ON document_chunks USING gin(metadata);
 ```
 
 ### Metadata Schema
