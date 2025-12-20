@@ -235,3 +235,38 @@ Unique content B that appears only in section beta."""
     assert "Section Alpha" not in chunks[1].content
     assert "Section Beta" in chunks[1].content
     assert "Section Beta" not in chunks[0].content
+
+
+def test_generate_unique_chunk_ids_and_preserve_revision():
+    """Test that each chunk gets a unique ID and revision is preserved in metadata."""
+    # Given
+    content = """## Section 1
+Content A
+## Section 2
+Content B"""
+    document = Document(
+        document_id="test-doc",
+        content=content,
+        metadata={"version": 2}  # Revision 2
+    )
+    
+    # When
+    chunks = chunk_document(document)
+    
+    # Then
+    assert len(chunks) == 2
+    
+    # Each chunk should have a unique chunk_id
+    chunk_ids = [chunk.chunk_id for chunk in chunks]
+    assert len(chunk_ids) == len(set(chunk_ids)), "All chunk IDs should be unique"
+    assert all(chunk_id for chunk_id in chunk_ids), "Chunk IDs should not be empty"
+    
+    # Revision should be preserved in each chunk's metadata
+    for chunk in chunks:
+        assert "revision" in chunk.metadata
+        assert chunk.metadata["revision"] == 2
+    
+    # Document ID should be preserved
+    for chunk in chunks:
+        assert "document_id" in chunk.metadata
+        assert chunk.metadata["document_id"] == "test-doc"
