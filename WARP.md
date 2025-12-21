@@ -4,7 +4,7 @@
 
 - [README.md](README.md) - Project overview
 - [docs/architecture.md](docs/architecture.md) - System architecture and components
-- [docs/project_plan.md](docs/project_plan.md) - Development workflow and phases
+- [docs/plans/project_plan.md](docs/plans/project_plan.md) - Project plan and roadmap
 - [docs/plans/progress.md](docs/plans/progress.md) - Current progress tracker
 
 ## Development Workflow
@@ -14,3 +14,7 @@
 ## File Organization
 
 - All plans and roadmaps must be stored in `docs/plans/`
+
+## State in the Project
+
+- [docs/progress.md](docs/progress.md) - Current state of the project
