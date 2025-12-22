@@ -5,7 +5,9 @@ Handles connection to Supabase and operations on document_chunks table.
 """
 
 from supabase import create_client, Client
+from typing import Dict, Any, Optional
 from src.config import SUPABASE_URL, SUPABASE_KEY, CHUNKS_TABLE
+from src.ingestion.embedder import Embedding
 
 
 class SupabaseClient:
@@ -40,3 +42,41 @@ class SupabaseClient:
             return True
         except Exception:
             return False
+    
+    def insert_chunk(
+        self,
+        document_id: str,
+        chunk_id: str,
+        revision: int,
+        status: str,
+        content: str,
+        embedding: Embedding,
+        metadata: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Insert a chunk with content, embedding, revision, and status.
+        
+        Args:
+            document_id: Logical document identifier
+            chunk_id: Unique chunk identifier
+            revision: Document revision number
+            status: Chunk status (e.g., 'active', 'superseded', 'archived')
+            content: Chunk text content
+            embedding: Embedding dataclass with 1024-dimensional vector
+            metadata: Optional metadata dictionary
+            
+        Returns:
+            Dictionary containing the inserted chunk data
+        """
+        data = {
+            "document_id": document_id,
+            "chunk_id": chunk_id,
+            "revision": revision,
+            "status": status,
+            "content": content,
+            "embedding": embedding.vector,
+            "metadata": metadata
+        }
+        
+        response = self.client.table(self.table_name).insert(data).execute()
+        return response.data[0]
