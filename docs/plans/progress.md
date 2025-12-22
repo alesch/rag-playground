@@ -102,16 +102,41 @@ Completed tests:
 
 ---
 
-## Next Up: Component 4 - Supabase Client 🔜
+## Next Up: Component 4 - Supabase Client 🔄
+
+---
+
+## In Progress
+
+### Component 4: Supabase Client 🔄
+**Module**: `src/database/supabase_client.py`  
+**Test File**: `tests/test_supabase_client.py`  
+**Status**: In progress (1/7 tests passing)
+
+Completed tests:
+1. ✅ Initialize connection with credentials
+
+Remaining tests:
+2. ⏳ Insert chunk with content, embedding, revision, and status
+3. ⏳ Batch insert multiple chunks efficiently
+4. ⏳ Enforce UNIQUE constraint on (document_id, chunk_id, revision)
+5. ⏳ Allow different revisions of same chunk_id
+6. ⏳ Mark previous revisions as superseded when inserting new revision
+7. ⏳ Query and filter chunks by status
+
+**Key Implementation Details (so far)**:
+- SupabaseClient class with credential validation
+- Connection verification via is_connected() method
+- Table name extracted from config (CHUNKS_TABLE)
+- Separate validation for URL and KEY with clear error messages
+
+**Latest Commits**:
+- 90e3085: Refactor Supabase client: Extract table name constant
+- bfb254b: Add Supabase client with connection initialization
 
 ---
 
 ## Remaining Components
-
-### Component 4: Supabase Client
-**Module**: `src/database/supabase_client.py`  
-**Test File**: `tests/test_supabase_client.py`  
-**Status**: Not started
 
 ### Component 5: Full Pipeline Integration
 **Module**: `scripts/ingest_corpus.py`  
