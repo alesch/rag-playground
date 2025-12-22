@@ -80,3 +80,25 @@ class SupabaseClient:
         
         response = self.client.table(self.table_name).insert(data).execute()
         return response.data[0]
+    
+    def delete_chunk(
+        self,
+        document_id: str,
+        chunk_id: str,
+        revision: int
+    ) -> None:
+        """
+        Delete a specific chunk by its composite key.
+        
+        Args:
+            document_id: Logical document identifier
+            chunk_id: Unique chunk identifier
+            revision: Document revision number
+        """
+        self.client.table(self.table_name).delete().eq(
+            "document_id", document_id
+        ).eq(
+            "chunk_id", chunk_id
+        ).eq(
+            "revision", revision
+        ).execute()

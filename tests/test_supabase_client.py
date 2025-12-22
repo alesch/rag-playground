@@ -23,24 +23,12 @@ def cleanup_test_chunk(client):
     revision = 1
     
     # Cleanup before test
-    client.client.table(client.table_name).delete().eq(
-        "document_id", document_id
-    ).eq(
-        "chunk_id", chunk_id
-    ).eq(
-        "revision", revision
-    ).execute()
+    client.delete_chunk(document_id, chunk_id, revision)
     
     yield {"document_id": document_id, "chunk_id": chunk_id, "revision": revision}
     
     # Cleanup after test
-    client.client.table(client.table_name).delete().eq(
-        "document_id", document_id
-    ).eq(
-        "chunk_id", chunk_id
-    ).eq(
-        "revision", revision
-    ).execute()
+    client.delete_chunk(document_id, chunk_id, revision)
 
 
 def test_initialize_connection(client):
