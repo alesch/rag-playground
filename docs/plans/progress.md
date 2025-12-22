@@ -1,7 +1,7 @@
 # Phase 2 TDD Progress Tracker
 
-**Last Updated**: 2025-12-20  
-**Current Status**: Chunker COMPLETE ✅
+**Last Updated**: 2025-12-22  
+**Current Status**: Embedder COMPLETE ✅
 
 ---
 
@@ -73,21 +73,40 @@ Completed tests:
 
 ---
 
-## Next Up: Component 3 - Embedder 🔜
+### Component 3: Embedder ✅
+**Module**: `src/ingestion/embedder.py`  
+**Test File**: `tests/test_embedder.py`  
+**Status**: All tests passing (4/4)
+
+Completed tests:
+1. ✅ Generate 1024-dimensional embedding for text via Ollama
+2. ✅ Batch embed multiple texts maintaining order
+3. ✅ Raise error when Ollama service unavailable
+4. ✅ Validate and reject empty input text
+
+**Key Implementation Details**:
+- Embedding dataclass with 1024-dimension validation
+- `__len__` method for clean `len(embedding)` usage
+- `generate_embedding()` function uses Ollama mxbai-embed-large model
+- `batch_embed()` processes multiple texts maintaining order
+- Empty text validation (empty string, whitespace, newlines)
+- Connection error handling with helpful error messages
+- 30-second timeout for API requests
+- Constants extracted: OLLAMA_API_URL, EMBEDDING_MODEL, EXPECTED_DIMENSIONS
+
+**Latest Commits**:
+- ddf7927: Add test for empty text validation
+- 4bc6b29: Add test for Ollama service unavailable error
+- 78f1628: Add batch_embed function and __len__ to Embedding
+- 3862de3: Add embedder with generate_embedding function
+
+---
+
+## Next Up: Component 4 - Supabase Client 🔜
 
 ---
 
 ## Remaining Components
-
-**Module**: `src/ingestion/embedder.py`  
-**Test File**: `tests/test_embedder.py`  
-**Status**: Not started
-
-Upcoming tests:
-1. Generate 1024-dimensional embedding for text via Ollama
-2. Batch embed multiple texts maintaining order
-3. Raise error when Ollama service unavailable
-4. Validate and reject empty input text
 
 ### Component 4: Supabase Client
 **Module**: `src/database/supabase_client.py`  
