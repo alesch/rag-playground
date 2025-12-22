@@ -23,5 +23,5 @@
 
 Activate the python environment with:
 ```
-source env/bin/activate
+source venv/bin/activate
 ```
