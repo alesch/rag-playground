@@ -18,3 +18,10 @@
 ## State in the Project
 
 - [docs/progress.md](docs/progress.md) - Current state of the project
+
+## Start here
+
+Activate the python environment with:
+```
+source env/bin/activate
+```
