@@ -64,3 +64,21 @@ def test_raise_error_when_ollama_unavailable():
     finally:
         # Restore original URL
         embedder.OLLAMA_API_URL = original_url
+
+
+def test_reject_empty_text():
+    """Test that empty text is rejected with ValueError."""
+    # When/Then - Test empty string
+    with pytest.raises(ValueError) as exc_info:
+        generate_embedding("")
+    assert "Text cannot be empty" in str(exc_info.value)
+    
+    # When/Then - Test whitespace-only string
+    with pytest.raises(ValueError) as exc_info:
+        generate_embedding("   ")
+    assert "Text cannot be empty" in str(exc_info.value)
+    
+    # When/Then - Test newline-only string
+    with pytest.raises(ValueError) as exc_info:
+        generate_embedding("\n\n")
+    assert "Text cannot be empty" in str(exc_info.value)
