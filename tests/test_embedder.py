@@ -41,3 +41,26 @@ def test_batch_embed_maintains_order():
     # Verify order: generate individual embedding for second text and compare
     individual_embedding = generate_embedding(texts[1])
     assert batch_embeddings[1] == individual_embedding, "Order must be maintained: second batch embedding should match second text"
+
+
+def test_raise_error_when_ollama_unavailable():
+    """Test that appropriate error is raised when Ollama service is unavailable."""
+    # Given
+    text = "Test text for embedding."
+    
+    # Temporarily change to unreachable address to simulate Ollama being unavailable
+    import src.ingestion.embedder as embedder
+    original_url = embedder.OLLAMA_API_URL
+    embedder.OLLAMA_API_URL = "http://127.0.0.1:9999/api/embeddings"  # Valid but unreachable port
+    
+    try:
+        # When/Then
+        with pytest.raises(ConnectionError) as exc_info:
+            generate_embedding(text)
+        
+        # Verify error message is helpful
+        assert "Failed to connect to Ollama" in str(exc_info.value)
+        assert "Is Ollama running?" in str(exc_info.value)
+    finally:
+        # Restore original URL
+        embedder.OLLAMA_API_URL = original_url
