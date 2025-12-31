@@ -1,6 +1,6 @@
 # Phase 2 TDD Progress Tracker
 
-**Last Updated**: 2025-12-22  
+**Last Updated**: 2025-12-31  
 **Current Status**: Supabase Client IN PROGRESS 🔄
 
 ---
@@ -46,14 +46,14 @@ Completed tests:
 ### Component 4: Supabase Client 🔄
 **Module**: `src/database/supabase_client.py`  
 **Test File**: `tests/test_supabase_client.py`  
-**Status**: In progress (2/7 tests passing)
+**Status**: In progress (3/7 tests passing)
 
 Completed tests:
 1. ✅ Initialize connection with credentials
 2. ✅ Insert chunk with content, embedding, revision, and status
+3. ✅ Batch insert multiple chunks efficiently
 
 Remaining tests:
-3. ⏳ Batch insert multiple chunks efficiently
 4. ⏳ Enforce UNIQUE constraint on (document_id, chunk_id, revision)
 5. ⏳ Allow different revisions of same chunk_id
 6. ⏳ Mark previous revisions as superseded when inserting new revision
@@ -62,13 +62,18 @@ Remaining tests:
 **Key Implementation Details**:
 - SupabaseClient class with credential validation
 - Connection verification via `is_connected()` method
-- `insert_chunk()` method accepts Embedding dataclass, inserts with all fields
-- `delete_chunk()` helper method for test cleanup and encapsulation
-- Pytest fixtures: module-scoped client, cleanup_test_chunk for setup/teardown
+- ChunkKey dataclass for composite key (document_id, chunk_id, revision)
+- ChunkRecord dataclass using composition (contains ChunkKey + data)
+- `insert_chunk()` method accepts ChunkRecord, inserts with all fields
+- `batch_insert_chunks()` method for efficient bulk inserts
+- `delete_chunk()` method accepts ChunkKey for test cleanup
+- `_prepare_chunk_data()` helper method to reduce duplication
+- Pytest module-scoped client fixture
 - Table name extracted from config (CHUNKS_TABLE)
 - Embedding.vector extracted before database insert
 
 **Latest Commits**:
+- 6feac50: Add batch_insert_chunks with ChunkKey/ChunkRecord refactoring
 - c9d719a: Suppress third-party deprecation warnings in pytest
 - 6fd22b5: Refactor: Add delete_chunk helper method
 - 7028466: Add insert_chunk to SupabaseClient with test
