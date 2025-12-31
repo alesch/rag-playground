@@ -19,7 +19,7 @@
 
 - [docs/progress.md](docs/progress.md) - Current state of the project
 
-## Start here
+## Do this
 
 Activate the python environment with:
 ```
