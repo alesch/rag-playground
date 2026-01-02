@@ -105,3 +105,40 @@ def test_batch_insert_chunks(client):
         # Cleanup after test
         for key in keys:
             client.delete_chunk(key)
+
+
+def test_unique_constraint_on_composite_key(client):
+    """Test that UNIQUE constraint is enforced on (document_id, chunk_id, revision)."""
+    # Given
+    key = ChunkKey(
+        document_id="test-doc-unique",
+        chunk_id="chunk-unique",
+        revision=1
+    )
+    content = "Test content for uniqueness."
+    chunk_record = ChunkRecord(
+        key=key,
+        status="active",
+        content=content,
+        embedding=generate_embedding(content),
+        metadata={"test": "unique"}
+    )
+    
+    # Cleanup before test
+    client.delete_chunk(key)
+    
+    try:
+        # When: Insert first chunk
+        client.insert_chunk(chunk_record)
+        
+        # Then: Attempt to insert duplicate should raise an error
+        with pytest.raises(Exception) as exc_info:
+            client.insert_chunk(chunk_record)
+        
+        # Verify it's a unique constraint violation
+        error_message = str(exc_info.value).lower()
+        assert "unique" in error_message or "duplicate" in error_message, \
+            f"Expected unique constraint error, got: {exc_info.value}"
+    finally:
+        # Cleanup after test
+        client.delete_chunk(key)

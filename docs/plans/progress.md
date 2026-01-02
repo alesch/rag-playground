@@ -72,14 +72,6 @@ Remaining tests:
 - Table name extracted from config (CHUNKS_TABLE)
 - Embedding.vector extracted before database insert
 
-**Latest Commits**:
-- 6feac50: Add batch_insert_chunks with ChunkKey/ChunkRecord refactoring
-- c9d719a: Suppress third-party deprecation warnings in pytest
-- 6fd22b5: Refactor: Add delete_chunk helper method
-- 7028466: Add insert_chunk to SupabaseClient with test
-
----
-
 ## Remaining Components
 
 ### Component 5: Full Pipeline Integration
@@ -88,4 +80,3 @@ Remaining tests:
 **Status**: Not started
 
 ---
-
