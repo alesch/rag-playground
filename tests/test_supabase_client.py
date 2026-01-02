@@ -142,3 +142,53 @@ def test_unique_constraint_on_composite_key(client):
     finally:
         # Cleanup after test
         client.delete_chunk(key)
+
+
+def test_allow_different_revisions_of_same_chunk(client):
+    """Test that different revisions of the same chunk_id can coexist."""
+    # Given
+    document_id = "test-doc-revisions"
+    chunk_id = "chunk-001"
+    
+    key_rev1 = ChunkKey(document_id=document_id, chunk_id=chunk_id, revision=1)
+    key_rev2 = ChunkKey(document_id=document_id, chunk_id=chunk_id, revision=2)
+    
+    chunk_rev1 = ChunkRecord(
+        key=key_rev1,
+        status="active",
+        content="Content for revision 1",
+        embedding=generate_embedding("Content for revision 1"),
+        metadata={"version": 1}
+    )
+    
+    chunk_rev2 = ChunkRecord(
+        key=key_rev2,
+        status="active",
+        content="Content for revision 2",
+        embedding=generate_embedding("Content for revision 2"),
+        metadata={"version": 2}
+    )
+    
+    # Cleanup before test
+    client.delete_chunk(key_rev1)
+    client.delete_chunk(key_rev2)
+    
+    try:
+        # When: Insert both revisions
+        result1 = client.insert_chunk(chunk_rev1)
+        result2 = client.insert_chunk(chunk_rev2)
+        
+        # Then: Both should be inserted successfully
+        assert result1["document_id"] == document_id
+        assert result1["chunk_id"] == chunk_id
+        assert result1["revision"] == 1
+        assert result1["content"] == "Content for revision 1"
+        
+        assert result2["document_id"] == document_id
+        assert result2["chunk_id"] == chunk_id
+        assert result2["revision"] == 2
+        assert result2["content"] == "Content for revision 2"
+    finally:
+        # Cleanup after test
+        client.delete_chunk(key_rev1)
+        client.delete_chunk(key_rev2)
