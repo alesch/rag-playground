@@ -68,19 +68,19 @@ def generate_embedding(text: str) -> Embedding:
     return Embedding(vector=vector)
 
 
-def batch_embed(texts: List[str]) -> List[Embedding]:
+def generate_embeddings(texts: List[str]) -> List[Embedding]:
     """
     Generate embeddings for multiple texts, maintaining order.
-    
+
     Processes texts sequentially to ensure order is preserved.
     For large batches, consider processing in smaller chunks.
-    
+
     Args:
         texts: List of texts to embed
-        
+
     Returns:
         List of Embedding objects in the same order as input texts
-        
+
     Raises:
         ValueError: If texts list is empty or any text is empty
         requests.exceptions.ConnectionError: If Ollama service is unavailable
@@ -88,10 +88,10 @@ def batch_embed(texts: List[str]) -> List[Embedding]:
     """
     if not texts:
         raise ValueError("Texts list cannot be empty")
-    
+
     embeddings = []
     for text in texts:
         embedding = generate_embedding(text)
         embeddings.append(embedding)
-    
+
     return embeddings

@@ -5,7 +5,7 @@ Tests embedding text via Ollama using mxbai-embed-large model.
 """
 
 import pytest
-from src.ingestion.embedder import generate_embedding, batch_embed, Embedding
+from src.ingestion.embedder import generate_embedding, generate_embeddings, Embedding
 
 
 def test_generate_embedding_via_ollama():
@@ -22,7 +22,7 @@ def test_generate_embedding_via_ollama():
     assert all(isinstance(x, float) for x in embedding.vector), "All values should be floats"
 
 
-def test_batch_embed_maintains_order():
+def test_generate_embeddings_maintains_order():
     """Test that batch embedding maintains the order of input texts."""
     # Given
     texts = [
@@ -30,17 +30,17 @@ def test_batch_embed_maintains_order():
         "Second chunk about encryption.",
         "Third chunk about access control."
     ]
-    
+
     # When
-    batch_embeddings = batch_embed(texts)
-    
+    embeddings = generate_embeddings(texts)
+
     # Then
-    assert len(batch_embeddings) == 3, "Should return same number of embeddings as input texts"
-    assert all(isinstance(e, Embedding) for e in batch_embeddings), "All should be Embedding objects"
-    
-    # Verify order: generate individual embedding for second text and compare
+    assert len(embeddings) == 3, "Should return same number of embeddings as input texts"
+    assert all(isinstance(e, Embedding) for e in embeddings), "All should be Embedding objects"
+
+    # And: Verify order by comparing with individual embedding
     individual_embedding = generate_embedding(texts[1])
-    assert batch_embeddings[1] == individual_embedding, "Order must be maintained: second batch embedding should match second text"
+    assert embeddings[1] == individual_embedding, "Order must be maintained"
 
 
 def test_raise_error_when_ollama_unavailable():
