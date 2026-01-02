@@ -192,3 +192,48 @@ def test_allow_different_revisions_of_same_chunk(client):
         # Cleanup after test
         client.delete_chunk(key_rev1)
         client.delete_chunk(key_rev2)
+
+
+def test_mark_previous_active_revision_as_superseded(client):
+    """Test that inserting a new revision marks the previous active revision as superseded."""
+    # Given
+    document_id = "test-doc-supersede"
+    chunk_id = "chunk-001"
+    
+    key_rev1 = ChunkKey(document_id=document_id, chunk_id=chunk_id, revision=1)
+    key_rev2 = ChunkKey(document_id=document_id, chunk_id=chunk_id, revision=2)
+    
+    chunk_rev1 = ChunkRecord(
+        key=key_rev1,
+        status="active",
+        content="Content for revision 1",
+        embedding=generate_embedding("Content for revision 1")
+    )
+    
+    chunk_rev2 = ChunkRecord(
+        key=key_rev2,
+        status="active",
+        content="Content for revision 2",
+        embedding=generate_embedding("Content for revision 2")
+    )
+    
+    # Cleanup before test
+    client.delete_chunk(key_rev1)
+    client.delete_chunk(key_rev2)
+    
+    try:
+        # When: Insert revision 1 (active)
+        client.insert_chunk(chunk_rev1)
+        
+        # And: Insert revision 2 (should automatically supersede revision 1)
+        client.insert_chunk(chunk_rev2)
+        
+        # Then: Query all revisions for this chunk (returns dict keyed by revision)
+        revisions = client.get_chunk_revisions(document_id, chunk_id)
+        
+        assert revisions[1]["status"] == "superseded", "Revision 1 should be superseded"
+        assert revisions[2]["status"] == "active", "Revision 2 should be active"
+    finally:
+        # Cleanup after test
+        client.delete_chunk(key_rev1)
+        client.delete_chunk(key_rev2)
