@@ -1,7 +1,7 @@
 # Phase 2 TDD Progress Tracker
 
 **Last Updated**: 2026-01-02
-**Current Status**: Supabase Client COMPLETE ✅
+**Current Status**: Full Pipeline Integration IN PROGRESS 🔄
 
 ---
 
@@ -73,11 +73,29 @@ Completed tests:
 
 ---
 
-## Remaining Components
+## In Progress
 
-### Component 5: Full Pipeline Integration
+### Component 5: Full Pipeline Integration 🔄
 **Module**: `scripts/ingest_corpus.py`
 **Test File**: `tests/test_ingestion_pipeline.py`
-**Status**: Not started
+**Status**: In progress (2/4 tests passing)
+
+Completed tests:
+1. ✅ Ingest single document end-to-end
+2. ✅ Ingest full corpus (4 documents)
+
+Remaining tests:
+3. ⏳ Re-ingestion supersedes previous revisions
+4. ⏳ Ingestion returns statistics
+
+**Key Implementation Details**:
+- `IngestionResult` dataclass for single document results
+- `CorpusIngestionResult` dataclass for corpus results
+- `ingest_document()` loads, chunks, embeds, and stores a single document
+- `ingest_corpus()` processes all documents in a directory
+- `_process_document()` helper eliminates duplication
+- `_build_chunk_records()` helper for ChunkRecord construction
+- Batch operations: `generate_embeddings()` + `batch_insert_chunks()`
+- Renamed `batch_embed` to `generate_embeddings` for clarity
 
 ---
