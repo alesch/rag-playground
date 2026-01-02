@@ -7,7 +7,7 @@ Orchestrates: Document Loading → Chunking → Embedding → Storage
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
-from src.ingestion.document_loader import load_document
+from src.ingestion.document_loader import load_document, load_corpus as load_corpus_documents, Document
 from src.ingestion.chunker import chunk_document, Chunk
 from src.ingestion.embedder import generate_embeddings, Embedding
 from src.database.supabase_client import SupabaseClient, ChunkKey, ChunkRecord
@@ -18,6 +18,13 @@ class IngestionResult:
     """Result of ingesting a document."""
     document_id: str
     chunks_stored: int
+
+
+@dataclass
+class CorpusIngestionResult:
+    """Result of ingesting a full corpus."""
+    documents_processed: int
+    total_chunks_stored: int
 
 
 def _build_chunk_records(
@@ -54,6 +61,25 @@ def _build_chunk_records(
     return records
 
 
+def _process_document(document: Document, client: SupabaseClient) -> int:
+    """
+    Process a single document: chunk, embed, and store.
+
+    Args:
+        document: Document to process
+        client: Supabase client for storage
+
+    Returns:
+        Number of chunks stored
+    """
+    chunks = chunk_document(document)
+    texts = [chunk.content for chunk in chunks]
+    embeddings = generate_embeddings(texts)
+    chunk_records = _build_chunk_records(document.document_id, chunks, embeddings)
+    client.batch_insert_chunks(chunk_records)
+    return len(chunk_records)
+
+
 def ingest_document(document_path: Path) -> IngestionResult:
     """
     Ingest a single document through the full pipeline.
@@ -64,24 +90,34 @@ def ingest_document(document_path: Path) -> IngestionResult:
     Returns:
         IngestionResult with document_id and chunks_stored count
     """
-    # Load document
     document = load_document(document_path)
-
-    # Chunk document
-    chunks = chunk_document(document)
-
-    # Generate embeddings for all chunks
-    texts = [chunk.content for chunk in chunks]
-    embeddings = generate_embeddings(texts)
-
-    # Build chunk records
-    chunk_records = _build_chunk_records(document.document_id, chunks, embeddings)
-
-    # Batch insert into database
     client = SupabaseClient()
-    client.batch_insert_chunks(chunk_records)
+    chunks_stored = _process_document(document, client)
 
     return IngestionResult(
         document_id=document.document_id,
-        chunks_stored=len(chunk_records)
+        chunks_stored=chunks_stored
+    )
+
+
+def ingest_corpus(corpus_path: Path) -> CorpusIngestionResult:
+    """
+    Ingest all documents from a corpus directory.
+
+    Args:
+        corpus_path: Path to the corpus directory
+
+    Returns:
+        CorpusIngestionResult with documents_processed and total_chunks_stored
+    """
+    documents = load_corpus_documents(corpus_path)
+    client = SupabaseClient()
+
+    total_chunks_stored = 0
+    for document in documents:
+        total_chunks_stored += _process_document(document, client)
+
+    return CorpusIngestionResult(
+        documents_processed=len(documents),
+        total_chunks_stored=total_chunks_stored
     )

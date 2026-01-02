@@ -6,7 +6,7 @@ Tests end-to-end flow: Corpus → Documents → Chunks → Embeddings → Supaba
 
 import pytest
 from pathlib import Path
-from scripts.ingest_corpus import ingest_document
+from scripts.ingest_corpus import ingest_document, ingest_corpus
 from src.database.supabase_client import SupabaseClient
 
 
@@ -62,13 +62,40 @@ class TestIngestionPipeline:
             for chunk in chunks:
                 client.delete_chunk(chunk.key)
 
-    @pytest.mark.skip(reason="Not implemented yet")
-    def test_ingest_full_corpus(self, corpus_path):
+    def test_ingest_full_corpus(self, corpus_path, client):
         """Test ingesting all documents from corpus."""
-        # Given: A corpus directory with multiple documents
-        # When: Ingesting the full corpus
-        # Then: All documents are chunked, embedded, and stored
-        pass
+        # Given
+        expected_doc_count = 4
+
+        # Cleanup before test
+        for doc_id in self._get_corpus_document_ids():
+            self._cleanup_document(client, doc_id)
+
+        try:
+            # When
+            result = ingest_corpus(corpus_path)
+
+            # Then
+            assert result.documents_processed == expected_doc_count
+            assert result.total_chunks_stored > 0
+
+            # And: Verify chunks exist for each document
+            for doc_id in self._get_corpus_document_ids():
+                chunks = client.query_chunks_by_status(doc_id, "active")
+                assert len(chunks) > 0, f"No chunks found for {doc_id}"
+        finally:
+            # Cleanup after test
+            for doc_id in self._get_corpus_document_ids():
+                self._cleanup_document(client, doc_id)
+
+    def _get_corpus_document_ids(self):
+        """Return expected document IDs from corpus."""
+        return [
+            "technical-infrastructure-documentation",
+            "soc-2-compliance-documentation",
+            "iso-27001-compliance-documentation",
+            "operational-procedures-policies",
+        ]
 
     @pytest.mark.skip(reason="Not implemented yet")
     def test_reingestion_supersedes_previous_revisions(self, single_doc_path):
