@@ -4,9 +4,10 @@ Supabase client for database operations.
 Handles connection to Supabase and operations on document_chunks table.
 """
 
+import json
 from dataclasses import dataclass
 from supabase import create_client, Client
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, cast
 from src.config import SUPABASE_URL, SUPABASE_KEY, CHUNKS_TABLE
 from src.ingestion.embedder import Embedding
 
@@ -87,13 +88,28 @@ class SupabaseClient:
     def insert_chunk(self, chunk_record: ChunkRecord) -> Dict[str, Any]:
         """
         Insert a chunk with content, embedding, revision, and status.
-        
+
+        If the new chunk is active, marks any previous active revisions
+        of the same document_id/chunk_id as superseded.
+
         Args:
             chunk_record: ChunkRecord containing all chunk data
-            
+
         Returns:
             Dictionary containing the inserted chunk data
         """
+        # Mark previous active revisions as superseded if inserting an active chunk
+        if chunk_record.status == "active":
+            self.client.table(self.table_name).update(
+                {"status": "superseded"}
+            ).eq(
+                "document_id", chunk_record.key.document_id
+            ).eq(
+                "chunk_id", chunk_record.key.chunk_id
+            ).eq(
+                "status", "active"
+            ).execute()
+
         data = self._prepare_chunk_data(chunk_record)
         response = self.client.table(self.table_name).insert(data).execute()
         return response.data[0]
@@ -115,7 +131,7 @@ class SupabaseClient:
     def delete_chunk(self, key: ChunkKey) -> None:
         """
         Delete a specific chunk by its composite key.
-        
+
         Args:
             key: ChunkKey containing the composite key fields
         """
@@ -126,3 +142,70 @@ class SupabaseClient:
         ).eq(
             "revision", key.revision
         ).execute()
+
+    def get_chunk_revisions(self, document_id: str, chunk_id: str) -> Dict[int, ChunkRecord]:
+        """
+        Get all revisions for a specific chunk.
+
+        Args:
+            document_id: The document ID
+            chunk_id: The chunk ID
+
+        Returns:
+            Dictionary keyed by revision number containing ChunkRecord objects
+        """
+        response = self.client.table(self.table_name).select("*").eq(
+            "document_id", document_id
+        ).eq(
+            "chunk_id", chunk_id
+        ).execute()
+
+        rows = cast(List[Dict[str, Any]], response.data)
+        return {row["revision"]: self._row_to_chunk_record(row) for row in rows}
+
+    def _row_to_chunk_record(self, row: Dict[str, Any]) -> ChunkRecord:
+        """
+        Convert a database row to a ChunkRecord.
+
+        Args:
+            row: Dictionary containing database row data
+
+        Returns:
+            ChunkRecord reconstructed from the row
+        """
+        # Embedding may be returned as JSON string from Supabase
+        embedding_data = row["embedding"]
+        if isinstance(embedding_data, str):
+            embedding_data = json.loads(embedding_data)
+
+        return ChunkRecord(
+            key=ChunkKey(
+                document_id=row["document_id"],
+                chunk_id=row["chunk_id"],
+                revision=row["revision"]
+            ),
+            status=row["status"],
+            content=row["content"],
+            embedding=Embedding(vector=embedding_data),
+            metadata=row.get("metadata")
+        )
+
+    def query_chunks_by_status(self, document_id: str, status: str) -> List[ChunkRecord]:
+        """
+        Query chunks filtered by document_id and status.
+
+        Args:
+            document_id: The document ID to filter by
+            status: The status to filter by (e.g., "active", "superseded")
+
+        Returns:
+            List of ChunkRecord objects matching the criteria
+        """
+        response = self.client.table(self.table_name).select("*").eq(
+            "document_id", document_id
+        ).eq(
+            "status", status
+        ).execute()
+
+        rows = cast(List[Dict[str, Any]], response.data)
+        return [self._row_to_chunk_record(row) for row in rows]

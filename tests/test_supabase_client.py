@@ -230,10 +230,70 @@ def test_mark_previous_active_revision_as_superseded(client):
         
         # Then: Query all revisions for this chunk (returns dict keyed by revision)
         revisions = client.get_chunk_revisions(document_id, chunk_id)
-        
-        assert revisions[1]["status"] == "superseded", "Revision 1 should be superseded"
-        assert revisions[2]["status"] == "active", "Revision 2 should be active"
+
+        assert isinstance(revisions[1], ChunkRecord)
+        assert revisions[1].status == "superseded", "Revision 1 should be superseded"
+        assert revisions[2].status == "active", "Revision 2 should be active"
     finally:
         # Cleanup after test
         client.delete_chunk(key_rev1)
         client.delete_chunk(key_rev2)
+
+
+def test_query_chunks_by_status(client):
+    """Test querying and filtering chunks by status."""
+    # Given
+    document_id = "test-doc-status-filter"
+
+    keys = [
+        ChunkKey(document_id=document_id, chunk_id="chunk-active-1", revision=1),
+        ChunkKey(document_id=document_id, chunk_id="chunk-active-2", revision=1),
+        ChunkKey(document_id=document_id, chunk_id="chunk-superseded", revision=1),
+    ]
+
+    chunks = [
+        ChunkRecord(
+            key=keys[0],
+            status="active",
+            content="Active chunk 1",
+            embedding=generate_embedding("Active chunk 1")
+        ),
+        ChunkRecord(
+            key=keys[1],
+            status="active",
+            content="Active chunk 2",
+            embedding=generate_embedding("Active chunk 2")
+        ),
+        ChunkRecord(
+            key=keys[2],
+            status="superseded",
+            content="Superseded chunk",
+            embedding=generate_embedding("Superseded chunk")
+        ),
+    ]
+
+    # Cleanup before test
+    for key in keys:
+        client.delete_chunk(key)
+
+    try:
+        # When: Insert all chunks
+        for chunk in chunks:
+            client.insert_chunk(chunk)
+
+        # Then: Query active chunks only
+        active_chunks = client.query_chunks_by_status(document_id, "active")
+        assert len(active_chunks) == 2, "Should find 2 active chunks"
+        assert all(isinstance(c, ChunkRecord) for c in active_chunks)
+        assert all(c.status == "active" for c in active_chunks)
+
+        # And: Query superseded chunks only
+        superseded_chunks = client.query_chunks_by_status(document_id, "superseded")
+        assert len(superseded_chunks) == 1, "Should find 1 superseded chunk"
+        assert isinstance(superseded_chunks[0], ChunkRecord)
+        assert superseded_chunks[0].status == "superseded"
+        assert superseded_chunks[0].key.chunk_id == "chunk-superseded"
+    finally:
+        # Cleanup after test
+        for key in keys:
+            client.delete_chunk(key)

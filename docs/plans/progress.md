@@ -1,7 +1,7 @@
 # Phase 2 TDD Progress Tracker
 
-**Last Updated**: 2025-12-31  
-**Current Status**: Supabase Client IN PROGRESS 🔄
+**Last Updated**: 2026-01-02
+**Current Status**: Supabase Client COMPLETE ✅
 
 ---
 
@@ -41,42 +41,43 @@ Completed tests:
 
 ---
 
-## In Progress
-
-### Component 4: Supabase Client 🔄
-**Module**: `src/database/supabase_client.py`  
-**Test File**: `tests/test_supabase_client.py`  
-**Status**: In progress (3/7 tests passing)
+### Component 4: Supabase Client ✅
+**Module**: `src/database/supabase_client.py`
+**Test File**: `tests/test_supabase_client.py`
+**Status**: All tests passing (7/7)
 
 Completed tests:
 1. ✅ Initialize connection with credentials
 2. ✅ Insert chunk with content, embedding, revision, and status
 3. ✅ Batch insert multiple chunks efficiently
-
-Remaining tests:
-4. ⏳ Enforce UNIQUE constraint on (document_id, chunk_id, revision)
-5. ⏳ Allow different revisions of same chunk_id
-6. ⏳ Mark previous revisions as superseded when inserting new revision
-7. ⏳ Query and filter chunks by status
+4. ✅ Enforce UNIQUE constraint on (document_id, chunk_id, revision)
+5. ✅ Allow different revisions of same chunk_id
+6. ✅ Mark previous revisions as superseded when inserting new revision
+7. ✅ Query and filter chunks by status
 
 **Key Implementation Details**:
 - SupabaseClient class with credential validation
 - Connection verification via `is_connected()` method
 - ChunkKey dataclass for composite key (document_id, chunk_id, revision)
 - ChunkRecord dataclass using composition (contains ChunkKey + data)
-- `insert_chunk()` method accepts ChunkRecord, inserts with all fields
+- `insert_chunk()` method accepts ChunkRecord, auto-supersedes previous active revisions
 - `batch_insert_chunks()` method for efficient bulk inserts
 - `delete_chunk()` method accepts ChunkKey for test cleanup
+- `get_chunk_revisions()` returns `Dict[int, ChunkRecord]`
+- `query_chunks_by_status()` returns `List[ChunkRecord]` filtered by status
+- `_row_to_chunk_record()` helper to reconstruct ChunkRecord from DB row
 - `_prepare_chunk_data()` helper method to reduce duplication
 - Pytest module-scoped client fixture
 - Table name extracted from config (CHUNKS_TABLE)
-- Embedding.vector extracted before database insert
+- JSON parsing for embedding vectors returned as strings from Supabase
+
+---
 
 ## Remaining Components
 
 ### Component 5: Full Pipeline Integration
-**Module**: `scripts/ingest_corpus.py`  
-**Test File**: `tests/test_ingestion_pipeline.py`  
+**Module**: `scripts/ingest_corpus.py`
+**Test File**: `tests/test_ingestion_pipeline.py`
 **Status**: Not started
 
 ---
