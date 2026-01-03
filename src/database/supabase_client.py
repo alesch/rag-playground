@@ -117,13 +117,30 @@ class SupabaseClient:
     def batch_insert_chunks(self, chunk_records: List[ChunkRecord]) -> List[Dict[str, Any]]:
         """
         Batch insert multiple chunks efficiently.
-        
+
+        For active chunks, marks any previous active revisions
+        of the same document_id/chunk_id as superseded.
+
         Args:
             chunk_records: List of ChunkRecord objects
-                
+
         Returns:
             List of dictionaries containing the inserted chunk data
         """
+        # Supersede previous active revisions for all active chunks
+        active_chunks = [cr for cr in chunk_records if cr.status == "active"]
+        for chunk_record in active_chunks:
+            self.client.table(self.table_name).update(
+                {"status": "superseded"}
+            ).eq(
+                "document_id", chunk_record.key.document_id
+            ).eq(
+                "chunk_id", chunk_record.key.chunk_id
+            ).eq(
+                "status", "active"
+            ).execute()
+
+        # Batch insert all chunks
         data = [self._prepare_chunk_data(chunk_record) for chunk_record in chunk_records]
         response = self.client.table(self.table_name).insert(data).execute()
         return response.data

@@ -97,13 +97,49 @@ class TestIngestionPipeline:
             "operational-procedures-policies",
         ]
 
-    @pytest.mark.skip(reason="Not implemented yet")
-    def test_reingestion_supersedes_previous_revisions(self, single_doc_path):
+    def test_reingestion_supersedes_previous_revisions(self, client, tmp_path):
         """Test that re-ingesting a document supersedes previous chunks."""
-        # Given: A document already ingested (revision 1)
-        # When: Re-ingesting the same document (revision 2)
-        # Then: Previous chunks are marked as superseded
-        pass
+        # Given
+        doc_path = tmp_path / "test_doc.md"
+        doc_path.write_text("""---
+version: 1
+title: Test Supersede Document
+---
+
+## Section One
+
+Content for section one.
+""")
+        document_id = "test-supersede-document"
+        self._cleanup_document(client, document_id)
+
+        try:
+            # When: Ingest version 1
+            result_v1 = ingest_document(doc_path)
+            assert result_v1.chunks_stored > 0
+
+            # And: Update document to version 2 and re-ingest
+            doc_path.write_text("""---
+version: 2
+title: Test Supersede Document
+---
+
+## Section One
+
+Content for section one.
+""")
+            result_v2 = ingest_document(doc_path)
+
+            # Then: Version 1 chunks should be superseded
+            superseded = client.query_chunks_by_status(document_id, "superseded")
+            active = client.query_chunks_by_status(document_id, "active")
+
+            assert len(superseded) > 0, "Should have superseded chunks"
+            assert len(active) > 0, "Should have active chunks"
+            assert all(c.key.revision == 1 for c in superseded), "Superseded should be rev 1"
+            assert all(c.key.revision == 2 for c in active), "Active should be rev 2"
+        finally:
+            self._cleanup_document(client, document_id)
 
     @pytest.mark.skip(reason="Not implemented yet")
     def test_ingestion_returns_statistics(self, corpus_path):

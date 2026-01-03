@@ -78,14 +78,14 @@ Completed tests:
 ### Component 5: Full Pipeline Integration 🔄
 **Module**: `scripts/ingest_corpus.py`
 **Test File**: `tests/test_ingestion_pipeline.py`
-**Status**: In progress (2/4 tests passing)
+**Status**: In progress (3/4 tests passing)
 
 Completed tests:
 1. ✅ Ingest single document end-to-end
 2. ✅ Ingest full corpus (4 documents)
+3. ✅ Re-ingestion supersedes previous revisions
 
 Remaining tests:
-3. ⏳ Re-ingestion supersedes previous revisions
 4. ⏳ Ingestion returns statistics
 
 **Key Implementation Details**:
@@ -96,6 +96,7 @@ Remaining tests:
 - `_process_document()` helper eliminates duplication
 - `_build_chunk_records()` helper for ChunkRecord construction
 - Batch operations: `generate_embeddings()` + `batch_insert_chunks()`
+- `batch_insert_chunks()` auto-supersedes previous active revisions
 - Renamed `batch_embed` to `generate_embeddings` for clarity
 
 ---
