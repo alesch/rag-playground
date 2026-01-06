@@ -25,6 +25,7 @@ class CorpusIngestionResult:
     """Result of ingesting a full corpus."""
     documents_processed: int
     total_chunks_stored: int
+    document_results: List[IngestionResult]
 
 
 def _build_chunk_records(
@@ -108,16 +109,24 @@ def ingest_corpus(corpus_path: Path) -> CorpusIngestionResult:
         corpus_path: Path to the corpus directory
 
     Returns:
-        CorpusIngestionResult with documents_processed and total_chunks_stored
+        CorpusIngestionResult with documents_processed, total_chunks_stored,
+        and per-document results
     """
     documents = load_corpus_documents(corpus_path)
     client = SupabaseClient()
 
+    document_results = []
     total_chunks_stored = 0
     for document in documents:
-        total_chunks_stored += _process_document(document, client)
+        chunks_stored = _process_document(document, client)
+        total_chunks_stored += chunks_stored
+        document_results.append(IngestionResult(
+            document_id=document.document_id,
+            chunks_stored=chunks_stored
+        ))
 
     return CorpusIngestionResult(
         documents_processed=len(documents),
-        total_chunks_stored=total_chunks_stored
+        total_chunks_stored=total_chunks_stored,
+        document_results=document_results
     )

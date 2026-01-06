@@ -1,7 +1,7 @@
 # Phase 2 TDD Progress Tracker
 
 **Last Updated**: 2026-01-05
-**Current Status**: Full Pipeline Integration IN PROGRESS 🔄
+**Current Status**: Full Pipeline Integration COMPLETE ✅
 
 ---
 
@@ -73,20 +73,16 @@ Completed tests:
 
 ---
 
-## In Progress
-
-### Component 5: Full Pipeline Integration 🔄
+### Component 5: Full Pipeline Integration ✅
 **Module**: `scripts/ingest_corpus.py`
 **Test File**: `tests/test_ingestion_pipeline.py`
-**Status**: In progress (3/4 tests passing)
+**Status**: All tests passing (4/4)
 
 Completed tests:
 1. ✅ Ingest single document end-to-end
 2. ✅ Ingest full corpus (4 documents)
 3. ✅ Re-ingestion supersedes previous revisions
-
-Remaining tests:
-4. ⏳ Ingestion returns statistics
+4. ✅ Ingestion returns statistics (per-document results)
 
 **Key Implementation Details**:
 - `IngestionResult` dataclass for single document results

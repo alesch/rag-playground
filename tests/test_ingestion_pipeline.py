@@ -115,10 +115,25 @@ Content for section one.
         assert all(c.key.revision == 1 for c in superseded), "Superseded should be rev 1"
         assert all(c.key.revision == 2 for c in active), "Active should be rev 2"
 
-    @pytest.mark.skip(reason="Not implemented yet")
-    def test_ingestion_returns_statistics(self, corpus_path):
+    def test_ingestion_returns_statistics(self, corpus_path, mock_embeddings, mock_database):
         """Test that ingestion returns useful statistics."""
-        # Given: A corpus to ingest
-        # When: Running the ingestion pipeline
-        # Then: Statistics include document count, chunk count, and status
-        pass
+        # Given
+        expected_doc_ids = [
+            "technical-infrastructure-documentation",
+            "soc-2-compliance-documentation",
+            "iso-27001-compliance-documentation",
+            "operational-procedures-policies",
+        ]
+
+        # When
+        result = ingest_corpus(corpus_path)
+
+        # Then: Has aggregate stats
+        assert result.documents_processed == 4
+        assert result.total_chunks_stored > 0
+
+        # And: Has per-document results
+        assert len(result.document_results) == 4
+        for doc_result in result.document_results:
+            assert doc_result.document_id in expected_doc_ids
+            assert doc_result.chunks_stored > 0
