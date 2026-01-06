@@ -7,7 +7,7 @@ from src.ingestion.embedder import Embedding
 from src.database.supabase_client import ChunkKey, ChunkRecord
 
 
-from tests.mocks import MockSupabaseClient, fake_generate_embedding, fake_generate_embeddings
+from tests.mocks import MockSupabaseClient, MockLLM, fake_generate_embedding, fake_generate_embeddings
 
 
 @pytest.fixture
@@ -41,3 +41,9 @@ def mock_embeddings(monkeypatch):
         "src.retrieval.retriever.generate_embedding",
         fake_generate_embedding
     )
+
+
+@pytest.fixture
+def mock_llm():
+    """Provide a mock LLM for fast tests."""
+    return MockLLM()
