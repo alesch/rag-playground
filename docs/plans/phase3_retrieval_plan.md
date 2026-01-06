@@ -31,14 +31,16 @@ Add vector similarity search using pgvector's cosine distance operator.
 |------|-------------|--------|
 | 1 | Search returns similar chunks | ✅ |
 | 2 | Results ordered by similarity | ⏭️ Skipped |
-| 3 | Respects top_k limit | |
-| 4 | Only returns active chunks (not superseded) | |
-| 5 | Respects similarity threshold | |
+| 3 | Respects top_k limit | ✅ |
+| 4 | Only returns active chunks (not superseded) | ✅ |
+| 5 | Respects similarity threshold | ⏭️ Skipped |
 
-### Test 2 Skipped - Rationale
-Ordering is guaranteed by pgvector's `ORDER BY embedding <=> query_embedding` in the SQL function.
-The ordering logic lives in the database, not in Python code we wrote.
-Testing ordering in a mock would only test the mock, not our actual code.
+### Tests 2 & 5 Skipped - Rationale
+Both ordering and threshold filtering are guaranteed by the PostgreSQL function:
+- Ordering: `ORDER BY embedding <=> query_embedding`
+- Threshold: `WHERE (1 - (embedding <=> query_embedding)) >= similarity_threshold`
+
+These behaviors live in SQL, not Python. Testing them in a mock would only test the mock.
 
 ## Files to Create/Modify
 

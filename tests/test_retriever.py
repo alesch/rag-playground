@@ -34,3 +34,52 @@ class TestRetriever:
         assert isinstance(results[0], SearchResult)
         assert results[0].chunk.content == "MFA authentication requires two factors."
         assert 0.0 <= results[0].similarity <= 1.0
+
+    def test_respects_top_k_limit(self, mock_embeddings, mock_supabase_client):
+        """Test that search returns at most top_k results."""
+        # Given: Many chunks indexed
+        for i in range(10):
+            chunk = ChunkRecord(
+                key=ChunkKey(document_id="doc-1", chunk_id=f"chunk-{i}", revision=1),
+                status="active",
+                content=f"Content about topic {i}",
+                embedding=Embedding(vector=[0.1] * 1024),
+                metadata=None
+            )
+            mock_supabase_client.insert_chunk(chunk)
+        retriever = Retriever(client=mock_supabase_client)
+
+        # When: Search with top_k=3
+        results = retriever.search("query", top_k=3)
+
+        # Then: Returns at most 3 results
+        assert len(results) == 3
+
+    def test_only_returns_active_chunks(self, mock_embeddings, mock_supabase_client):
+        """Test that search only returns active chunks, not superseded."""
+        # Given: Active and superseded chunks
+        active_chunk = ChunkRecord(
+            key=ChunkKey(document_id="doc-1", chunk_id="chunk-1", revision=2),
+            status="active",
+            content="Current version",
+            embedding=Embedding(vector=[0.1] * 1024),
+            metadata=None
+        )
+        superseded_chunk = ChunkRecord(
+            key=ChunkKey(document_id="doc-1", chunk_id="chunk-1", revision=1),
+            status="superseded",
+            content="Old version",
+            embedding=Embedding(vector=[0.1] * 1024),
+            metadata=None
+        )
+        mock_supabase_client.chunks[("doc-1", "chunk-1", 2)] = active_chunk
+        mock_supabase_client.chunks[("doc-1", "chunk-1", 1)] = superseded_chunk
+        retriever = Retriever(client=mock_supabase_client)
+
+        # When: Search
+        results = retriever.search("query")
+
+        # Then: Only active chunk returned
+        assert len(results) == 1
+        assert results[0].chunk.status == "active"
+        assert results[0].chunk.content == "Current version"
