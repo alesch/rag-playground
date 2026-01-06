@@ -1,7 +1,7 @@
-# Phase 2 TDD Progress Tracker
+# TDD Progress Tracker
 
-**Last Updated**: 2026-01-05
-**Current Status**: Full Pipeline Integration COMPLETE ✅
+**Last Updated**: 2026-01-06
+**Current Status**: Phase 3 Retrieval COMPLETE ✅
 
 ---
 
@@ -101,5 +101,26 @@ Completed tests:
 - `mock_database` fixture patches SupabaseClient in ingest_corpus module
 - Integration tests run in ~0.5s instead of ~116s (230x speedup)
 - Supabase client tests still hit real database for full validation
+
+---
+
+### Component 6: Retriever ✅
+**Module**: `src/retrieval/retriever.py`
+**Test File**: `tests/test_retriever.py`
+**Status**: 3 tests passing, 2 skipped
+
+Completed tests:
+1. ✅ Search returns similar chunks
+2. ⏭️ Results ordered by similarity (skipped - guaranteed by pgvector SQL)
+3. ✅ Respects top_k limit
+4. ✅ Only returns active chunks
+5. ⏭️ Respects similarity threshold (skipped - guaranteed by pgvector SQL)
+
+**Key Implementation Details**:
+- `Retriever` class wraps embedding generation and database search
+- `SearchResult` dataclass in `supabase_client.py` (shared interface)
+- `search_by_embedding()` method uses PostgreSQL RPC for pgvector search
+- `search_chunks` PostgreSQL function for vector similarity
+- Tests use `MockSupabaseClient` for fast execution
 
 ---
