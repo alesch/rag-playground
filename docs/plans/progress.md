@@ -128,14 +128,14 @@ Completed tests:
 ### Component 7: Generator 🔄
 **Module**: `src/generation/generator.py`
 **Test File**: `tests/test_generator.py`
-**Status**: In progress (2/4 tests passing)
+**Status**: In progress (3/4 tests passing)
 
 Completed tests:
 1. ✅ Generate answer from retrieved chunks
 2. ✅ Answer includes citations to source chunks
+3. ✅ Handle empty retrieval results gracefully (skip LLM call, save tokens)
 
 Remaining tests:
-3. ⏳ Handle empty retrieval results gracefully
 4. ⏳ Prompt includes all retrieved context
 
 ---

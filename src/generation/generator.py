@@ -54,6 +54,13 @@ class Generator:
             GeneratedAnswer with answer text and citations
         """
         results = self.retriever.search(query, top_k=top_k)
+
+        if not results:
+            return GeneratedAnswer(
+                answer="I cannot find this information in the documentation.",
+                citations=[]
+            )
+
         prompt = self._build_prompt(query, results)
         response = self.llm.invoke(prompt)
         citations = self._extract_citations(results)

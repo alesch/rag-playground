@@ -59,3 +59,17 @@ class TestGenerator:
         assert result.citations[0].key.chunk_id == "chunk-1"
         assert result.citations[0].key.revision == 1
         assert "MFA requires" in result.citations[0].content_snippet
+
+    def test_handle_empty_retrieval_results(
+        self, mock_embeddings, mock_supabase_client, mock_llm
+    ):
+        """Test that generator handles empty retrieval results gracefully."""
+        # Given: No chunks in database
+        generator = Generator(client=mock_supabase_client, llm=mock_llm)
+
+        # When: Generate answer
+        result = generator.generate("What is MFA?")
+
+        # Then: Returns answer with empty citations
+        assert isinstance(result, GeneratedAnswer)
+        assert len(result.citations) == 0
