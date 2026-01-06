@@ -27,6 +27,44 @@ WITH (lists = 100);
 -- Create indexes for metadata filtering
 CREATE INDEX idx_document_id ON document_chunks(document_id);
 CREATE INDEX idx_metadata ON document_chunks USING gin(metadata);
+
+-- Vector similarity search function
+CREATE OR REPLACE FUNCTION search_chunks(
+    query_embedding vector(1024),
+    max_results int DEFAULT 5,
+    similarity_threshold float DEFAULT 0.0,
+    status_filter text DEFAULT 'active'
+)
+RETURNS TABLE (
+    id UUID,
+    document_id TEXT,
+    chunk_id TEXT,
+    revision INTEGER,
+    status TEXT,
+    content TEXT,
+    embedding vector(1024),
+    metadata JSONB,
+    similarity float
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        dc.id,
+        dc.document_id,
+        dc.chunk_id,
+        dc.revision,
+        dc.status,
+        dc.content,
+        dc.embedding,
+        dc.metadata,
+        (1 - (dc.embedding <=> query_embedding))::float as similarity
+    FROM document_chunks dc
+    WHERE dc.status = status_filter
+    AND (1 - (dc.embedding <=> query_embedding)) >= similarity_threshold
+    ORDER BY dc.embedding <=> query_embedding
+    LIMIT max_results;
+END;
+$$ LANGUAGE plpgsql;
 ```
 
 ### Metadata Schema

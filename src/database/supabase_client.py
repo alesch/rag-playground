@@ -226,3 +226,38 @@ class SupabaseClient:
 
         rows = cast(List[Dict[str, Any]], response.data)
         return [self._row_to_chunk_record(row) for row in rows]
+
+    def search_by_embedding(
+        self,
+        query_embedding: Embedding,
+        top_k: int = 5,
+        threshold: float = 0.0,
+        status: str = "active"
+    ) -> List[tuple[ChunkRecord, float]]:
+        """
+        Search for chunks similar to the query embedding using pgvector.
+
+        Args:
+            query_embedding: The query embedding to search for
+            top_k: Maximum number of results to return
+            threshold: Minimum similarity score (0.0 to 1.0)
+            status: Filter by chunk status (default: "active")
+
+        Returns:
+            List of (ChunkRecord, similarity_score) tuples, sorted by similarity
+        """
+        response = self.client.rpc(
+            "search_chunks",
+            {
+                "query_embedding": query_embedding.vector,
+                "max_results": top_k,
+                "similarity_threshold": threshold,
+                "status_filter": status
+            }
+        ).execute()
+
+        rows = cast(List[Dict[str, Any]], response.data)
+        return [
+            (self._row_to_chunk_record(row), row["similarity"])
+            for row in rows
+        ]
