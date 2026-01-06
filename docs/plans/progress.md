@@ -55,21 +55,6 @@ Completed tests:
 6. ✅ Mark previous revisions as superseded when inserting new revision
 7. ✅ Query and filter chunks by status
 
-**Key Implementation Details**:
-- SupabaseClient class with credential validation
-- Connection verification via `is_connected()` method
-- ChunkKey dataclass for composite key (document_id, chunk_id, revision)
-- ChunkRecord dataclass using composition (contains ChunkKey + data)
-- `insert_chunk()` method accepts ChunkRecord, auto-supersedes previous active revisions
-- `batch_insert_chunks()` method for efficient bulk inserts
-- `delete_chunk()` method accepts ChunkKey for test cleanup
-- `get_chunk_revisions()` returns `Dict[int, ChunkRecord]`
-- `query_chunks_by_status()` returns `List[ChunkRecord]` filtered by status
-- `_row_to_chunk_record()` helper to reconstruct ChunkRecord from DB row
-- `_prepare_chunk_data()` helper method to reduce duplication
-- Pytest module-scoped client fixture
-- Table name extracted from config (CHUNKS_TABLE)
-- JSON parsing for embedding vectors returned as strings from Supabase
 
 ---
 
@@ -83,24 +68,6 @@ Completed tests:
 2. ✅ Ingest full corpus (4 documents)
 3. ✅ Re-ingestion supersedes previous revisions
 4. ✅ Ingestion returns statistics (per-document results)
-
-**Key Implementation Details**:
-- `IngestionResult` dataclass for single document results
-- `CorpusIngestionResult` dataclass for corpus results
-- `ingest_document()` loads, chunks, embeds, and stores a single document
-- `ingest_corpus()` processes all documents in a directory
-- `_process_document()` helper eliminates duplication
-- `_build_chunk_records()` helper for ChunkRecord construction
-- Batch operations: `generate_embeddings()` + `batch_insert_chunks()`
-- `batch_insert_chunks()` auto-supersedes previous active revisions
-- Renamed `batch_embed` to `generate_embeddings` for clarity
-
-**Test Performance Optimizations**:
-- `MockSupabaseClient` in conftest.py for in-memory database testing
-- `mock_embeddings` fixture returns deterministic fake embeddings
-- `mock_database` fixture patches SupabaseClient in ingest_corpus module
-- Integration tests run in ~0.5s instead of ~116s (230x speedup)
-- Supabase client tests still hit real database for full validation
 
 ---
 
@@ -116,13 +83,6 @@ Completed tests:
 4. ✅ Only returns active chunks
 5. ⏭️ Respects similarity threshold (skipped - guaranteed by pgvector SQL)
 
-**Key Implementation Details**:
-- `Retriever` class wraps embedding generation and database search
-- `SearchResult` dataclass in `supabase_client.py` (shared interface)
-- `search_by_embedding()` method uses PostgreSQL RPC for pgvector search
-- `search_chunks` PostgreSQL function for vector similarity
-- Tests use `MockSupabaseClient` for fast execution
-
 ---
 
 ### Component 7: Generator 🔄
@@ -134,8 +94,6 @@ Completed tests:
 1. ✅ Generate answer from retrieved chunks
 2. ✅ Answer includes citations to source chunks
 3. ✅ Handle empty retrieval results gracefully (skip LLM call, save tokens)
-
-Remaining tests:
-4. ⏳ Prompt includes all retrieved context
+4. ✅ Prompt includes all retrieved context
 
 ---
