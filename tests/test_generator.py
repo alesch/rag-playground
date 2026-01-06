@@ -73,3 +73,35 @@ class TestGenerator:
         # Then: Returns answer with empty citations
         assert isinstance(result, GeneratedAnswer)
         assert len(result.citations) == 0
+
+    def test_prompt_includes_all_context(
+        self, mock_embeddings, mock_supabase_client, mock_llm
+    ):
+        """Test that prompt includes content from all retrieved chunks."""
+        # Given: Multiple chunks indexed
+        chunks = [
+            ChunkRecord(
+                key=ChunkKey(document_id="doc-1", chunk_id="chunk-1", revision=1),
+                status="active",
+                content="MFA requires two factors.",
+                embedding=Embedding(vector=[0.1] * 1024),
+                metadata=None
+            ),
+            ChunkRecord(
+                key=ChunkKey(document_id="doc-1", chunk_id="chunk-2", revision=1),
+                status="active",
+                content="SSO enables single sign-on.",
+                embedding=Embedding(vector=[0.1] * 1024),
+                metadata=None
+            ),
+        ]
+        for chunk in chunks:
+            mock_supabase_client.insert_chunk(chunk)
+        generator = Generator(client=mock_supabase_client, llm=mock_llm)
+
+        # When: Generate answer
+        generator.generate("What is authentication?")
+
+        # Then: Prompt includes all chunk content
+        assert "MFA requires two factors" in mock_llm.last_prompt
+        assert "SSO enables single sign-on" in mock_llm.last_prompt
