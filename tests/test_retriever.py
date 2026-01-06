@@ -5,8 +5,8 @@ Tests similarity search functionality for finding relevant document chunks.
 """
 
 import pytest
-from src.retrieval.retriever import Retriever, SearchResult
-from src.database.supabase_client import ChunkKey, ChunkRecord
+from src.retrieval.retriever import Retriever
+from src.database.supabase_client import ChunkKey, ChunkRecord, SearchResult
 from src.ingestion.embedder import Embedding
 
 

@@ -4,17 +4,9 @@ Retriever module for similarity search.
 Finds relevant document chunks for a given query using vector similarity.
 """
 
-from dataclasses import dataclass
 from typing import List, Optional
-from src.database.supabase_client import SupabaseClient, ChunkRecord
+from src.database.supabase_client import SupabaseClient, SearchResult
 from src.ingestion.embedder import generate_embedding
-
-
-@dataclass
-class SearchResult:
-    """A chunk with its similarity score."""
-    chunk: ChunkRecord
-    similarity: float
 
 
 class Retriever:
@@ -47,9 +39,8 @@ class Retriever:
             List of SearchResult objects, sorted by similarity descending
         """
         embedding = generate_embedding(query)
-        results = self.client.search_by_embedding(
+        return self.client.search_by_embedding(
             query_embedding=embedding,
             top_k=top_k,
             threshold=threshold
         )
-        return [SearchResult(chunk=chunk, similarity=score) for chunk, score in results]

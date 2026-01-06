@@ -3,7 +3,7 @@ Mock implementations of external services for testing.
 """
 
 from src.ingestion.embedder import Embedding
-from src.database.supabase_client import ChunkKey, ChunkRecord
+from src.database.supabase_client import ChunkKey, ChunkRecord, SearchResult
 
 
 class MockSupabaseClient:
@@ -61,10 +61,10 @@ class MockSupabaseClient:
         top_k: int = 5,
         threshold: float = 0.0,
         status: str = "active"
-    ) -> list[tuple[ChunkRecord, float]]:
+    ) -> list[SearchResult]:
         """Mock vector similarity search. Returns matching chunks with similarity 1.0."""
         results = [
-            (record, 1.0)
+            SearchResult(chunk=record, similarity=1.0)
             for record in self.chunks.values()
             if record.status == status
         ]

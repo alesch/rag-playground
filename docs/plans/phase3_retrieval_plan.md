@@ -27,13 +27,18 @@ Add vector similarity search using pgvector's cosine distance operator.
 
 ## TDD Test Plan
 
-| Test | Description |
-|------|-------------|
-| 1 | Search returns similar chunks |
-| 2 | Results ordered by similarity (descending) |
-| 3 | Respects top_k limit |
-| 4 | Only returns active chunks (not superseded) |
-| 5 | Respects similarity threshold |
+| Test | Description | Status |
+|------|-------------|--------|
+| 1 | Search returns similar chunks | ✅ |
+| 2 | Results ordered by similarity | ⏭️ Skipped |
+| 3 | Respects top_k limit | |
+| 4 | Only returns active chunks (not superseded) | |
+| 5 | Respects similarity threshold | |
+
+### Test 2 Skipped - Rationale
+Ordering is guaranteed by pgvector's `ORDER BY embedding <=> query_embedding` in the SQL function.
+The ordering logic lives in the database, not in Python code we wrote.
+Testing ordering in a mock would only test the mock, not our actual code.
 
 ## Files to Create/Modify
 

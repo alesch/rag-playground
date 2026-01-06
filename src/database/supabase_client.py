@@ -24,12 +24,19 @@ class ChunkKey:
 @dataclass
 class ChunkRecord:
     """Represents a chunk ready for database insertion."""
-    
+
     key: ChunkKey
     status: str
     content: str
     embedding: Embedding
     metadata: Optional[Dict[str, Any]] = None
+
+
+@dataclass
+class SearchResult:
+    """A chunk with its similarity score from vector search."""
+    chunk: ChunkRecord
+    similarity: float
 
 
 class SupabaseClient:
@@ -233,7 +240,7 @@ class SupabaseClient:
         top_k: int = 5,
         threshold: float = 0.0,
         status: str = "active"
-    ) -> List[tuple[ChunkRecord, float]]:
+    ) -> List[SearchResult]:
         """
         Search for chunks similar to the query embedding using pgvector.
 
@@ -244,7 +251,7 @@ class SupabaseClient:
             status: Filter by chunk status (default: "active")
 
         Returns:
-            List of (ChunkRecord, similarity_score) tuples, sorted by similarity
+            List of SearchResult objects, sorted by similarity descending
         """
         response = self.client.rpc(
             "search_chunks",
@@ -258,6 +265,6 @@ class SupabaseClient:
 
         rows = cast(List[Dict[str, Any]], response.data)
         return [
-            (self._row_to_chunk_record(row), row["similarity"])
+            SearchResult(chunk=self._row_to_chunk_record(row), similarity=row["similarity"])
             for row in rows
         ]
