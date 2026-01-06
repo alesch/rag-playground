@@ -1,6 +1,6 @@
 # Phase 2 TDD Progress Tracker
 
-**Last Updated**: 2026-01-02
+**Last Updated**: 2026-01-05
 **Current Status**: Full Pipeline Integration IN PROGRESS 🔄
 
 ---
@@ -98,5 +98,12 @@ Remaining tests:
 - Batch operations: `generate_embeddings()` + `batch_insert_chunks()`
 - `batch_insert_chunks()` auto-supersedes previous active revisions
 - Renamed `batch_embed` to `generate_embeddings` for clarity
+
+**Test Performance Optimizations**:
+- `MockSupabaseClient` in conftest.py for in-memory database testing
+- `mock_embeddings` fixture returns deterministic fake embeddings
+- `mock_database` fixture patches SupabaseClient in ingest_corpus module
+- Integration tests run in ~0.5s instead of ~116s (230x speedup)
+- Supabase client tests still hit real database for full validation
 
 ---
