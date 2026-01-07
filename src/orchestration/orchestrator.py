@@ -1,5 +1,6 @@
 """Orchestrator module for RAG pipeline coordination."""
 
+from typing import List
 from src.generation.generator import Generator, GeneratedAnswer
 
 
@@ -12,3 +13,7 @@ class Orchestrator:
     def answer(self, question: str) -> GeneratedAnswer:
         """Answer a single question using RAG."""
         return self.generator.generate(question)
+
+    def process_questionnaire(self, questions: List[str]) -> List[GeneratedAnswer]:
+        """Process multiple questions and return answers in order."""
+        return [self.answer(q) for q in questions]

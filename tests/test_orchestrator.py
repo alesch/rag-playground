@@ -72,10 +72,31 @@ class TestOrchestrator:
         with pytest.raises(RuntimeError, match="LLM service unavailable"):
             orchestrator.answer("Any question?")
 
-    @pytest.mark.skip(reason="Not implemented yet")
-    def test_process_multiple_questions_as_batch(self):
+    def test_process_multiple_questions_as_batch(
+        self, mock_supabase_client, mock_llm, mock_embeddings
+    ):
         """Process questionnaire and return list of answers in order."""
-        pass
+        # Given
+        mock_supabase_client.insert_chunk(ChunkRecord(
+            key=ChunkKey("security-doc", "auth-section", 1),
+            status="active",
+            content="finanso supports OAuth 2.0 authentication.",
+            embedding=Embedding(vector=[0.1] * 1024),
+            metadata=None
+        ))
+        orchestrator = Orchestrator(client=mock_supabase_client, llm=mock_llm)
+        questions = [
+            "What authentication methods are supported?",
+            "How is data encrypted?",
+            "What certifications do you have?",
+        ]
+
+        # When
+        results = orchestrator.process_questionnaire(questions)
+
+        # Then
+        assert len(results) == 3
+        assert all(isinstance(r, GeneratedAnswer) for r in results)
 
     @pytest.mark.skip(reason="Not implemented yet")
     def test_state_flows_through_langgraph_nodes(self):
