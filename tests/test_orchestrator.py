@@ -33,10 +33,21 @@ class TestOrchestrator:
         assert len(result.citations) == 1
         assert result.citations[0].key.document_id == "security-doc"
 
-    @pytest.mark.skip(reason="Not implemented yet")
-    def test_handle_empty_retrieval_results(self):
+    def test_handle_empty_retrieval_results(
+        self, mock_supabase_client, mock_llm, mock_embeddings
+    ):
         """Return graceful 'not found' response without LLM call."""
-        pass
+        # Given
+        # Empty database - no chunks inserted
+        orchestrator = Orchestrator(client=mock_supabase_client, llm=mock_llm)
+
+        # When
+        result = orchestrator.answer("What is the meaning of life?")
+
+        # Then
+        assert "cannot find" in result.answer.lower()
+        assert result.citations == []
+        assert mock_llm.last_prompt is None  # LLM was never called
 
     @pytest.mark.skip(reason="Not implemented yet")
     def test_handle_llm_failure_gracefully(self):
