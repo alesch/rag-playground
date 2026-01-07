@@ -49,10 +49,28 @@ class TestOrchestrator:
         assert result.citations == []
         assert mock_llm.last_prompt is None  # LLM was never called
 
-    @pytest.mark.skip(reason="Not implemented yet")
-    def test_handle_llm_failure_gracefully(self):
+    def test_handle_llm_failure_gracefully(
+        self, mock_supabase_client, mock_embeddings
+    ):
         """Raise appropriate error when LLM fails."""
-        pass
+        # Given
+        mock_supabase_client.insert_chunk(ChunkRecord(
+            key=ChunkKey("doc", "chunk", 1),
+            status="active",
+            content="Some content",
+            embedding=Embedding(vector=[0.1] * 1024),
+            metadata=None
+        ))
+
+        class FailingLLM:
+            def invoke(self, prompt: str) -> str:
+                raise RuntimeError("LLM service unavailable")
+
+        orchestrator = Orchestrator(client=mock_supabase_client, llm=FailingLLM())
+
+        # When / Then
+        with pytest.raises(RuntimeError, match="LLM service unavailable"):
+            orchestrator.answer("Any question?")
 
     @pytest.mark.skip(reason="Not implemented yet")
     def test_process_multiple_questions_as_batch(self):

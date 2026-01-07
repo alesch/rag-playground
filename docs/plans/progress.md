@@ -101,14 +101,14 @@ Completed tests:
 ### Component 8: Orchestrator 🔄
 **Module**: `src/orchestration/orchestrator.py`
 **Test File**: `tests/test_orchestrator.py`
-**Status**: In progress (2/5 tests passing)
+**Status**: In progress (3/5 tests passing)
 
 Completed tests:
 1. ✅ Answer single question end-to-end
 2. ✅ Handle empty retrieval results
+3. ✅ Handle LLM failure gracefully
 
 Pending tests:
-3. ⏳ Handle LLM failure gracefully
 4. ⏳ Process multiple questions as batch
 5. ⏳ State flows through LangGraph nodes
 
