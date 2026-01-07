@@ -1,7 +1,7 @@
 # TDD Progress Tracker
 
 **Last Updated**: 2026-01-07
-**Current Status**: Phase 4 Generation COMPLETE ✅
+**Current Status**: Phase 5 Orchestration IN PROGRESS 🔄
 
 ---
 
@@ -95,5 +95,21 @@ Completed tests:
 2. ✅ Answer includes citations to source chunks
 3. ✅ Handle empty retrieval results gracefully (skip LLM call, save tokens)
 4. ✅ Prompt includes all retrieved context
+
+---
+
+### Component 8: Orchestrator 🔄
+**Module**: `src/orchestration/orchestrator.py`
+**Test File**: `tests/test_orchestrator.py`
+**Status**: In progress (1/5 tests passing)
+
+Completed tests:
+1. ✅ Answer single question end-to-end
+
+Pending tests:
+2. ⏳ Handle empty retrieval results
+3. ⏳ Handle LLM failure gracefully
+4. ⏳ Process multiple questions as batch
+5. ⏳ State flows through LangGraph nodes
 
 ---
