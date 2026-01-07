@@ -98,7 +98,7 @@ class TestOrchestrator:
         assert len(results) == 3
         assert all(isinstance(r, GeneratedAnswer) for r in results)
 
-    @pytest.mark.skip(reason="Not implemented yet")
+    @pytest.mark.skip(reason="Deferred to Phase 6 - LangGraph state not needed for basic orchestration")
     def test_state_flows_through_langgraph_nodes(self):
         """Verify state contains retrieved chunks before generation."""
         pass
