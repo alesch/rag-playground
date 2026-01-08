@@ -29,10 +29,10 @@
 
 - **Database**: Supabase (PostgreSQL + pgvector extension)
 - **Embeddings**: Ollama mxbai-embed-large (1024 dimensions)
-- **LLM**: Ollama llama3.1 (or other local models like mistral, phi3)
+- **LLM**: Ollama llama3.2 (or other local models like mistral, phi3)
 - **Framework**: LangChain + LangGraph
 - **Language**: Python 3.11+
-- **Development**: Jupyter notebooks for pedagogical exploration
+- **Development**: AAID (BDD + strict TDD guiding an AI coding agent) 
 - **Local LLM Runtime**: Ollama (free, no API keys required)
 
 ## Success Criteria
