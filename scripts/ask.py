@@ -3,10 +3,12 @@
 Interactive CLI for asking questions to the Complaila RAG system.
 
 Usage:
-    python scripts/ask.py                    # Interactive mode
-    python scripts/ask.py "Your question"   # Single question mode
+    python scripts/ask.py                              # Interactive mode
+    python scripts/ask.py "Your question"             # Single question mode
+    python scripts/ask.py questionnaire.md            # Process questionnaire file
 """
 
+import re
 import sys
 from pathlib import Path
 
@@ -99,6 +101,49 @@ def single_question_mode(orchestrator: Orchestrator, question: str):
     print_answer(result)
 
 
+def extract_questions(markdown_path: Path) -> list[tuple[str, str]]:
+    """Extract questions from a markdown questionnaire.
+
+    Returns list of (question_id, question_text) tuples.
+    """
+    content = markdown_path.read_text()
+
+    # Match patterns like "### Q1.1: Question text?"
+    pattern = r'###\s+(Q[\d.]+):\s*(.+?)(?=\n|$)'
+    matches = re.findall(pattern, content)
+
+    return [(qid, question.strip()) for qid, question in matches]
+
+
+def questionnaire_mode(orchestrator: Orchestrator, questionnaire_path: Path):
+    """Process all questions from a questionnaire file."""
+    print(f"\nProcessing questionnaire: {questionnaire_path}")
+    print("=" * 70)
+
+    questions = extract_questions(questionnaire_path)
+    print(f"Found {len(questions)} questions\n")
+
+    for i, (qid, question) in enumerate(questions, 1):
+        print(f"\n{'=' * 70}")
+        print(f"[{i}/{len(questions)}] {qid}: {question}")
+        print("-" * 70)
+
+        try:
+            result = orchestrator.answer(question)
+            print(f"\nANSWER:\n{result.answer}")
+
+            if result.citations:
+                print(f"\nSOURCES:")
+                for citation in result.citations[:2]:  # Show top 2 sources
+                    print(f"  - {citation.key.document_id}")
+        except Exception as e:
+            print(f"\nERROR: {e}")
+
+    print(f"\n{'=' * 70}")
+    print(f"Completed {len(questions)} questions")
+    print("=" * 70)
+
+
 def main():
     """Main entry point."""
     print("Initializing Complaila RAG system...")
@@ -110,9 +155,14 @@ def main():
         sys.exit(1)
 
     if len(sys.argv) > 1:
-        # Single question mode
-        question = " ".join(sys.argv[1:])
-        single_question_mode(orchestrator, question)
+        arg = sys.argv[1]
+        # Check if argument is a markdown file (questionnaire mode)
+        if arg.endswith('.md') and Path(arg).exists():
+            questionnaire_mode(orchestrator, Path(arg))
+        else:
+            # Single question mode
+            question = " ".join(sys.argv[1:])
+            single_question_mode(orchestrator, question)
     else:
         # Interactive mode
         interactive_mode(orchestrator)
