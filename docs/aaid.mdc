@@ -33,7 +33,9 @@ The complete AAID workflow follows this order:
    - **Enter RED phase immediately**
 4. **Stage 4: TDD Cycle** (strict TDD phase rules now apply)
    - Follow RED → GREEN → REFACTOR → repeat cycle
+   - Update progress file and commit changes after each cycle.
    - Continue until all specification scenarios are tested and passing
+
 
 Stages 1-3 use normal AI assistance. Stage 4 enforces strict TDD discipline as defined below.
 
@@ -177,7 +179,7 @@ Ask user to clarify if unclear which type of work is being done
 
 **On Success:** Present outcome (even if "no refactoring needed"), then **STOP AND AWAIT USER REVIEW**
 **On Error:** If any test breaks, **STOP** and report what broke
-**Next Phase:** After approval, automatically continue to RED for next test if more specs/scenarios remain. If all covered, feature complete.
+**Next Phase:** After approval, update the progess file and commit changes. Then continue to RED for next test if more specs/scenarios remain. If all covered, feature complete.
 
 ## Starting TDD
 

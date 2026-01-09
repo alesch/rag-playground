@@ -15,13 +15,9 @@
 
 - All plans and roadmaps must be stored in `docs/plans/`
 
-## State in the Project
+## Development environment
 
-- [docs/progress.md](docs/progress.md) - Current state of the project
-
-## Do this
-
-Activate the python environment with:
+Activate the python environment using:
 ```
 source venv/bin/activate
 ```
