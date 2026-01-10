@@ -128,13 +128,13 @@ Completed tests:
 
 ---
 
-### Component 2: AnswerSetStore
+### Component 2: RunStore
 **Module**: `src/domain/answer_store.py`
 **Test File**: `tests/test_answer_store.py`
 **Status**: IN PROGRESS
 
 Completed tests:
-1. ✅ Create answer_set with full config snapshot
+1. ✅ Create run with full config snapshot
 2. ✅ Save answer with retrieved chunks
 3. ✅ Save answer with citations
 4. ✅ Get all answers for an answer_set
