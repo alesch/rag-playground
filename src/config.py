@@ -61,6 +61,12 @@ MIN_CHUNK_SIZE: int = 100  # Minimum chunk size to avoid too-small fragments
 # Database Configuration
 # ============================================================================
 
+# Database provider: "sqlite" or "supabase"
+DB_PROVIDER: str = os.getenv("DB_PROVIDER", "sqlite")
+
+# SQLite configuration
+SQLITE_DB_PATH: Path = PROJECT_ROOT / "data" / "complaila.db"
+
 # Table name for storing document chunks
 CHUNKS_TABLE: str = "document_chunks"
 
@@ -83,12 +89,17 @@ def validate_config() -> bool:
     """
     errors = []
     
-    # Check Supabase credentials
-    if not SUPABASE_URL or SUPABASE_URL == "your_supabase_project_url":
-        errors.append("SUPABASE_URL not configured")
-    
-    if not SUPABASE_KEY or SUPABASE_KEY == "your_supabase_anon_key":
-        errors.append("SUPABASE_KEY not configured")
+    # Provider-specific database validation
+    if DB_PROVIDER == "supabase":
+        if not SUPABASE_URL or SUPABASE_URL == "your_supabase_project_url":
+            errors.append("SUPABASE_URL not configured for supabase provider")
+        if not SUPABASE_KEY or SUPABASE_KEY == "your_supabase_anon_key":
+            errors.append("SUPABASE_KEY not configured for supabase provider")
+    elif DB_PROVIDER == "sqlite":
+        # Ensure data directory exists
+        SQLITE_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        errors.append(f"Invalid DB_PROVIDER: {DB_PROVIDER}. Must be 'sqlite' or 'supabase'")
     
     # Check corpus path exists
     if not CORPUS_PATH.exists():

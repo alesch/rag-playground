@@ -10,7 +10,8 @@ from typing import List
 from src.ingestion.document_loader import load_document, load_corpus as load_corpus_documents, Document
 from src.ingestion.chunker import chunk_document, Chunk
 from src.ingestion.embedder import generate_embeddings, Embedding
-from src.database.supabase_client import SupabaseClient, ChunkKey, ChunkRecord
+from src.database.factory import get_db_client
+from src.database.base import VectorDatabaseClient, ChunkKey, ChunkRecord
 
 
 @dataclass
@@ -62,13 +63,13 @@ def _build_chunk_records(
     return records
 
 
-def _process_document(document: Document, client: SupabaseClient) -> int:
+def _process_document(document: Document, client: VectorDatabaseClient) -> int:
     """
     Process a single document: chunk, embed, and store.
 
     Args:
         document: Document to process
-        client: Supabase client for storage
+        client: Vector database client for storage
 
     Returns:
         Number of chunks stored
@@ -92,7 +93,7 @@ def ingest_document(document_path: Path) -> IngestionResult:
         IngestionResult with document_id and chunks_stored count
     """
     document = load_document(document_path)
-    client = SupabaseClient()
+    client = get_db_client()
     chunks_stored = _process_document(document, client)
 
     return IngestionResult(
@@ -113,7 +114,7 @@ def ingest_corpus(corpus_path: Path) -> CorpusIngestionResult:
         and per-document results
     """
     documents = load_corpus_documents(corpus_path)
-    client = SupabaseClient()
+    client = get_db_client()
 
     document_results = []
     total_chunks_stored = 0

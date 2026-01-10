@@ -6,7 +6,7 @@ Uses retrieved chunks and LLM to generate answers with citations.
 
 from dataclasses import dataclass
 from typing import List, Optional
-from src.database.supabase_client import SupabaseClient, SearchResult, ChunkKey
+from src.database.base import VectorDatabaseClient, SearchResult, ChunkKey
 from src.retrieval.retriever import Retriever
 
 
@@ -29,14 +29,14 @@ class Generator:
 
     def __init__(
         self,
-        client: Optional[SupabaseClient] = None,
+        client: Optional[VectorDatabaseClient] = None,
         llm=None
     ):
         """
         Initialize the generator.
 
         Args:
-            client: SupabaseClient for database access
+            client: VectorDatabaseClient for database access
             llm: LLM instance for answer generation
         """
         self.retriever = Retriever(client=client)

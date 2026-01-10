@@ -8,6 +8,8 @@ import pytest
 from src.database.supabase_client import SupabaseClient, ChunkRecord, ChunkKey
 from src.ingestion.embedder import generate_embedding
 
+pytestmark = pytest.mark.slow
+
 
 @pytest.fixture(scope="module")
 def client():

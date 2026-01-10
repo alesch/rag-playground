@@ -5,41 +5,14 @@ Handles connection to Supabase and operations on document_chunks table.
 """
 
 import json
-from dataclasses import dataclass
 from supabase import create_client, Client
 from typing import Dict, Any, Optional, List, cast
 from src.config import SUPABASE_URL, SUPABASE_KEY, CHUNKS_TABLE
 from src.ingestion.embedder import Embedding
+from src.database.base import VectorDatabaseClient, ChunkKey, ChunkRecord, SearchResult
 
 
-@dataclass
-class ChunkKey:
-    """Represents the composite key for a chunk."""
-    
-    document_id: str
-    chunk_id: str
-    revision: int
-
-
-@dataclass
-class ChunkRecord:
-    """Represents a chunk ready for database insertion."""
-
-    key: ChunkKey
-    status: str
-    content: str
-    embedding: Embedding
-    metadata: Optional[Dict[str, Any]] = None
-
-
-@dataclass
-class SearchResult:
-    """A chunk with its similarity score from vector search."""
-    chunk: ChunkRecord
-    similarity: float
-
-
-class SupabaseClient:
+class SupabaseClient(VectorDatabaseClient):
     """Client for Supabase database operations."""
     
     def __init__(self):

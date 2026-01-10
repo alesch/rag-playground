@@ -5,21 +5,22 @@ Finds relevant document chunks for a given query using vector similarity.
 """
 
 from typing import List, Optional
-from src.database.supabase_client import SupabaseClient, SearchResult
+from src.database.factory import get_db_client
+from src.database.base import VectorDatabaseClient, SearchResult
 from src.ingestion.embedder import generate_embedding
 
 
 class Retriever:
     """Retrieves relevant document chunks using vector similarity search."""
 
-    def __init__(self, client: Optional[SupabaseClient] = None):
+    def __init__(self, client: Optional[VectorDatabaseClient] = None):
         """
         Initialize the retriever.
 
         Args:
-            client: SupabaseClient instance. Creates one if not provided.
+            client: VectorDatabaseClient instance. Creates one from factory if not provided.
         """
-        self.client = client or SupabaseClient()
+        self.client = client or get_db_client()
 
     def search(
         self,

@@ -3,11 +3,11 @@ Mock implementations of external services for testing.
 """
 
 from src.ingestion.embedder import Embedding
-from src.database.supabase_client import ChunkKey, ChunkRecord, SearchResult
+from src.database.base import VectorDatabaseClient, ChunkKey, ChunkRecord, SearchResult
 
 
-class MockSupabaseClient:
-    """In-memory mock of SupabaseClient for fast integration tests."""
+class MockSupabaseClient(VectorDatabaseClient):
+    """In-memory mock of VectorDatabaseClient for fast integration tests."""
 
     def __init__(self):
         self.chunks: dict[tuple[str, str, int], ChunkRecord] = {}
@@ -47,6 +47,14 @@ class MockSupabaseClient:
     def delete_chunk(self, key: ChunkKey) -> None:
         stored_key = (key.document_id, key.chunk_id, key.revision)
         self.chunks.pop(stored_key, None)
+
+    def get_chunk_revisions(self, document_id: str, chunk_id: str) -> dict[int, ChunkRecord]:
+        """Get all revisions for a specific chunk."""
+        return {
+            record.key.revision: record
+            for record in self.chunks.values()
+            if record.key.document_id == document_id and record.key.chunk_id == chunk_id
+        }
 
     def query_chunks_by_status(self, document_id: str, status: str) -> list[ChunkRecord]:
         return [

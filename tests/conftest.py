@@ -10,6 +10,24 @@ from src.database.supabase_client import ChunkKey, ChunkRecord
 from tests.mocks import MockSupabaseClient, MockLLM, fake_generate_embedding, fake_generate_embeddings
 
 
+def pytest_addoption(parser):
+    """Add command line option to run slow tests."""
+    parser.addoption(
+        "--run-slow", action="store_true", default=False, help="run slow tests"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    """Skip slow tests unless --run-slow is specified."""
+    if config.getoption("--run-slow"):
+        return
+    
+    skip_slow = pytest.mark.skip(reason="need --run-slow option to run")
+    for item in items:
+        if "slow" in item.keywords:
+            item.add_marker(skip_slow)
+
+
 @pytest.fixture
 def mock_supabase_client():
     """Provide an in-memory mock SupabaseClient for fast tests."""

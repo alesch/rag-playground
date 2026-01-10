@@ -24,9 +24,9 @@ def single_doc_path(corpus_path):
 
 @pytest.fixture
 def mock_database(mock_supabase_client, monkeypatch):
-    """Patch SupabaseClient in ingest_corpus to use mock."""
+    """Patch get_db_client in ingest_corpus to use mock."""
     monkeypatch.setattr(
-        "scripts.ingest_corpus.SupabaseClient",
+        "scripts.ingest_corpus.get_db_client",
         lambda: mock_supabase_client
     )
     return mock_supabase_client
