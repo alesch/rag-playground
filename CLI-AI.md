@@ -1,6 +1,7 @@
 # Complaila Project Rules
 
-Read all the files mentioned here.
+Read all the files mentioned here below.
+Confirm for the user when you have read files and instructions in this file.
 
 ## Project Context
 
