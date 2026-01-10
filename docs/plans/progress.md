@@ -1,7 +1,7 @@
 # TDD Progress Tracker
 
-**Last Updated**: 2026-01-09
-**Current Status**: Phase 5 Orchestration COMPLETE ✅
+**Last Updated**: 2026-01-10
+**Current Status**: Phase 5.5 Domain Module IN PROGRESS
 
 ---
 
@@ -109,5 +109,35 @@ Completed tests:
 3. ✅ Handle LLM failure gracefully
 4. ✅ Process multiple questions as batch
 5. ⏭️ State flows through LangGraph nodes (deferred to Phase 6)
+
+---
+
+## Phase 5.5: Domain Module
+
+### Component 1: QuestionnaireStore ✅
+**Module**: `src/domain/questionnaire_store.py`
+**Test File**: `tests/test_questionnaire_store.py`
+**Status**: All tests passing (5/5)
+
+Completed tests:
+1. ✅ Save and retrieve questionnaire by ID
+2. ✅ Save batch of questions with sequence
+3. ✅ Import from markdown file
+4. ✅ List questionnaires filtered by status
+5. ✅ Handle duplicate questionnaire ID (raises error)
+
+---
+
+### Component 2: AnswerSetStore
+**Module**: `src/domain/answer_store.py`
+**Test File**: `tests/test_answer_store.py`
+**Status**: Pending
+
+---
+
+### Component 3: QuestionnaireRunner
+**Module**: `src/domain/runner.py`
+**Test File**: `tests/test_runner.py`
+**Status**: Pending
 
 ---
