@@ -6,14 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Dict, Any, Optional, List
 from src.ingestion.embedder import Embedding
-
-
-@dataclass
-class ChunkKey:
-    """Represents the composite key for a chunk."""
-    document_id: str
-    chunk_id: str
-    revision: int
+from src.domain.models import ChunkKey
 
 
 @dataclass

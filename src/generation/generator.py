@@ -6,15 +6,9 @@ Uses retrieved chunks and LLM to generate answers with citations.
 
 from dataclasses import dataclass
 from typing import List, Optional
-from src.database.base import VectorDatabaseClient, SearchResult, ChunkKey
+from src.database.base import VectorDatabaseClient, SearchResult
+from src.domain.models import Citation
 from src.retrieval.retriever import Retriever
-
-
-@dataclass
-class Citation:
-    """Reference to a source chunk."""
-    key: ChunkKey
-    content_snippet: str
 
 
 @dataclass
