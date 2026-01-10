@@ -36,28 +36,13 @@
 3. Add error handling
 4. Process full questionnaires
 
+### Phase 5.5: Domain Module
+
+Model the core domain (questionnaires and answers) with persistence and comparison support.
+
 ### Phase 6: Refinement
 
 1. Evaluate end-to-end performance
 2. Improve prompts and retrieval
 3. Add evaluation metrics
 4. Document learnings
-
-
-## Next Steps
-
-### Immediate Actions
-
-1. ✅ Create project structure
-2. ✅ Set up Supabase project
-3. ✅ Generate demo corpus
-4. ✅ Write database schema
-5. ✅ Implement Module 1 (database setup)
-
-### Follow-up Tasks
-
-- Implement remaining modules sequentially
-- Create comprehensive demo corpus (4 documents)
-- Generate realistic sample questionnaire
-- Build evaluation framework
-- Document learnings and best practices
