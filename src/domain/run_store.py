@@ -104,45 +104,39 @@ class RunStore:
         return self._row_to_run(row)
 
     def save_answer(self, answer: Answer) -> None:
-        """Save an answer."""
+        """Save an answer using double dispatch."""
+        answer.save_on(self)
+
+    def save_answer_success(self, answer: AnswerSuccess) -> None:
+        """Save a successful answer."""
         cursor = self.conn.cursor()
         
-        is_success = isinstance(answer, AnswerSuccess)
+        citations_json = json.dumps([
+            {
+                "key": {
+                    "document_id": c.key.document_id,
+                    "chunk_id": c.key.chunk_id,
+                    "revision": c.key.revision
+                },
+                "content_snippet": c.content_snippet
+            } for c in answer.citations
+        ])
         
-        answer_text = None
-        error_message = None
-        citations_json = None
-        retrieved_chunks_json = None
-        meta_json = None
+        retrieved_chunks_json = json.dumps([
+            {
+                "document_id": c.document_id,
+                "chunk_id": c.chunk_id,
+                "revision": c.revision,
+                "content": c.content,
+                "similarity_score": c.similarity_score,
+                "rank": c.rank
+            } for c in answer.retrieved_chunks
+        ])
         
-        if is_success:
-            answer_text = answer.answer_text
-            citations_json = json.dumps([
-                {
-                    "key": {
-                        "document_id": c.key.document_id,
-                        "chunk_id": c.key.chunk_id,
-                        "revision": c.key.revision
-                    },
-                    "content_snippet": c.content_snippet
-                } for c in answer.citations
-            ])
-            retrieved_chunks_json = json.dumps([
-                {
-                    "document_id": c.document_id,
-                    "chunk_id": c.chunk_id,
-                    "revision": c.revision,
-                    "content": c.content,
-                    "similarity_score": c.similarity_score,
-                    "rank": c.rank
-                } for c in answer.retrieved_chunks
-            ])
-            meta_json = json.dumps({
-                "query_embedding": answer.query_embedding,
-                "generation_time_ms": answer.generation_time_ms
-            })
-        else:
-            error_message = answer.error_message
+        meta_json = json.dumps({
+            "query_embedding": answer.query_embedding,
+            "generation_time_ms": answer.generation_time_ms
+        })
 
         cursor.execute("""
             INSERT OR REPLACE INTO answers 
@@ -153,12 +147,34 @@ class RunStore:
             answer.id,
             answer.run_id,
             answer.question_id,
-            is_success,
-            answer_text,
-            error_message,
+            True,
+            answer.answer_text,
+            None,
             citations_json,
             retrieved_chunks_json,
             meta_json
+        ))
+        self.conn.commit()
+
+    def save_answer_failure(self, answer: AnswerFailure) -> None:
+        """Save a failed answer."""
+        cursor = self.conn.cursor()
+        
+        cursor.execute("""
+            INSERT OR REPLACE INTO answers 
+            (id, run_id, question_id, is_success, answer_text, error_message, 
+             citations_json, retrieved_chunks_json, meta_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            answer.id,
+            answer.run_id,
+            answer.question_id,
+            False,
+            None,
+            answer.error_message,
+            None,
+            None,
+            None
         ))
         self.conn.commit()
 

@@ -101,6 +101,10 @@ class Answer:
     run_id: str
     question_id: str
 
+    def save_on(self, store: Any) -> None:
+        """Dispatch persistence to the store (Visitor pattern)."""
+        raise NotImplementedError("Subclasses must implement save_on")
+
 
 @dataclass
 class AnswerSuccess(Answer):
@@ -111,6 +115,10 @@ class AnswerSuccess(Answer):
     citations: List[Citation] = field(default_factory=list)
     query_embedding: Optional[List[float]] = None
     generation_time_ms: Optional[int] = None
+
+    def save_on(self, store: Any) -> None:
+        """Double dispatch to store.save_answer_success."""
+        store.save_answer_success(self)
 
     @staticmethod
     def from_GeneratedAnswer(run_id: str, question: Question, generated_answer: Any) -> "AnswerSuccess":
@@ -129,6 +137,10 @@ class AnswerSuccess(Answer):
 class AnswerFailure(Answer):
     """A failed answer attempt."""
     error_message: str
+
+    def save_on(self, store: Any) -> None:
+        """Double dispatch to store.save_answer_failure."""
+        store.save_answer_failure(self)
 
     @staticmethod
     def from_exception(run_id: str, question: Question, exception: Exception) -> "AnswerFailure":
