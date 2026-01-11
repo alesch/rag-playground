@@ -27,11 +27,11 @@
 - ✅ Handle JSON serialization for complex fields (retrieved chunks)
 - ✅ Implement immutable `RunConfig` separation and reusability
 
-### Component 4: Citation Normalization
-**Status**: Pending
-- [ ] Create `answer_citations` table
-- [ ] Refactor `RunStore` to use relational citations instead of JSON
-- [ ] Verify cascade deletion
+### Component 4: Citation Normalization ✅
+**Status**: All tests passing (2/2 in test_citation_normalization.py)
+- ✅ Create `citations` table
+- ✅ Refactor `RunStore` to use relational citations instead of JSON
+- ✅ Verify cascade deletion
 
 ---
 

@@ -111,16 +111,7 @@ class RunStore:
         """Save a successful answer."""
         cursor = self.conn.cursor()
         
-        citations_json = json.dumps([
-            {
-                "key": {
-                    "document_id": c.key.document_id,
-                    "chunk_id": c.key.chunk_id,
-                    "revision": c.key.revision
-                },
-                "content_snippet": c.content_snippet
-            } for c in answer.citations
-        ])
+        # Citations are handled separately in citatons table now.
         
         retrieved_chunks_json = json.dumps([
             {
@@ -141,8 +132,8 @@ class RunStore:
         cursor.execute("""
             INSERT OR REPLACE INTO answers 
             (id, run_id, question_id, is_success, answer_text, error_message, 
-             citations_json, retrieved_chunks_json, meta_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             retrieved_chunks_json, meta_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             answer.id,
             answer.run_id,
@@ -150,10 +141,18 @@ class RunStore:
             True,
             answer.answer_text,
             None,
-            citations_json,
             retrieved_chunks_json,
             meta_json
         ))
+
+        # Save to normalized citations table
+        cursor.execute("DELETE FROM citations WHERE answer_id = ?", (answer.id,))
+        for c in answer.citations:
+            cursor.execute("""
+                INSERT INTO citations (answer_id, document_id, chunk_id, revision, content_snippet)
+                VALUES (?, ?, ?, ?, ?)
+            """, (answer.id, c.key.document_id, c.key.chunk_id, c.key.revision, c.content_snippet))
+
         self.conn.commit()
 
     def save_answer_failure(self, answer: AnswerFailure) -> None:
@@ -163,8 +162,8 @@ class RunStore:
         cursor.execute("""
             INSERT OR REPLACE INTO answers 
             (id, run_id, question_id, is_success, answer_text, error_message, 
-             citations_json, retrieved_chunks_json, meta_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             retrieved_chunks_json, meta_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             answer.id,
             answer.run_id,
@@ -172,7 +171,6 @@ class RunStore:
             False,
             None,
             answer.error_message,
-            None,
             None,
             None
         ))
@@ -248,13 +246,20 @@ class RunStore:
     def _row_to_answer(self, row) -> Answer:
         """Convert a database row to an AnswerSuccess or AnswerFailure."""
         if row['is_success']:
-            citations = []
-            if row['citations_json']:
-                for c in json.loads(row['citations_json']):
-                    citations.append(Citation(
-                        key=ChunkKey(**c['key']),
-                        content_snippet=c['content_snippet']
-                    ))
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT * FROM citations WHERE answer_id = ?", (row['id'],))
+            citation_rows = cursor.fetchall()
+            
+            citations = [
+                Citation(
+                    key=ChunkKey(
+                        document_id=c['document_id'],
+                        chunk_id=c['chunk_id'],
+                        revision=c['revision']
+                    ),
+                    content_snippet=c['content_snippet']
+                ) for c in citation_rows
+            ]
             
             retrieved_chunks = []
             if row['retrieved_chunks_json']:

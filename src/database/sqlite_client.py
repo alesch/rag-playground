@@ -116,9 +116,20 @@ class SQLiteClient(VectorDatabaseClient):
                 is_success BOOLEAN NOT NULL,
                 answer_text TEXT,
                 error_message TEXT,
-                citations_json TEXT,
                 retrieved_chunks_json TEXT,
                 meta_json TEXT
+            )
+        """)
+        
+        # Domain: Citations
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS citations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                answer_id TEXT REFERENCES answers(id) ON DELETE CASCADE,
+                document_id TEXT,
+                chunk_id TEXT,
+                revision INTEGER,
+                content_snippet TEXT
             )
         """)
         
