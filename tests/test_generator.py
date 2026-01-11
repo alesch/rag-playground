@@ -14,7 +14,7 @@ class TestGenerator:
     """Tests for answer generation."""
 
     def test_generate_answer_from_retrieved_chunks(
-        self, mock_embeddings, mock_supabase_client, mock_llm
+        self, mock_embeddings, vector_db, mock_llm
     ):
         """Test that generator produces an answer from retrieved chunks."""
         # Given: Chunks indexed in database
@@ -25,8 +25,8 @@ class TestGenerator:
             embedding=Embedding(vector=[0.1] * 1024),
             metadata=None
         )
-        mock_supabase_client.insert_chunk(chunk)
-        generator = Generator(client=mock_supabase_client, llm=mock_llm)
+        vector_db.insert_chunk(chunk)
+        generator = Generator(client=vector_db, llm=mock_llm)
 
         # When: Generate answer
         result = generator.generate("What is MFA?")
@@ -36,7 +36,7 @@ class TestGenerator:
         assert len(result.answer) > 0
 
     def test_answer_includes_citations(
-        self, mock_embeddings, mock_supabase_client, mock_llm
+        self, mock_embeddings, vector_db, mock_llm
     ):
         """Test that generated answer includes citations to source chunks."""
         # Given: Chunk indexed in database
@@ -47,8 +47,8 @@ class TestGenerator:
             embedding=Embedding(vector=[0.1] * 1024),
             metadata=None
         )
-        mock_supabase_client.insert_chunk(chunk)
-        generator = Generator(client=mock_supabase_client, llm=mock_llm)
+        vector_db.insert_chunk(chunk)
+        generator = Generator(client=vector_db, llm=mock_llm)
 
         # When: Generate answer
         result = generator.generate("What is MFA?")
@@ -61,11 +61,11 @@ class TestGenerator:
         assert "MFA requires" in result.citations[0].content_snippet
 
     def test_handle_empty_retrieval_results(
-        self, mock_embeddings, mock_supabase_client, mock_llm
+        self, mock_embeddings, vector_db, mock_llm
     ):
         """Test that generator handles empty retrieval results gracefully."""
         # Given: No chunks in database
-        generator = Generator(client=mock_supabase_client, llm=mock_llm)
+        generator = Generator(client=vector_db, llm=mock_llm)
 
         # When: Generate answer
         result = generator.generate("What is MFA?")
@@ -75,7 +75,7 @@ class TestGenerator:
         assert len(result.citations) == 0
 
     def test_prompt_includes_all_context(
-        self, mock_embeddings, mock_supabase_client, mock_llm
+        self, mock_embeddings, vector_db, mock_llm
     ):
         """Test that prompt includes content from all retrieved chunks."""
         # Given: Multiple chunks indexed
@@ -96,8 +96,8 @@ class TestGenerator:
             ),
         ]
         for chunk in chunks:
-            mock_supabase_client.insert_chunk(chunk)
-        generator = Generator(client=mock_supabase_client, llm=mock_llm)
+            vector_db.insert_chunk(chunk)
+        generator = Generator(client=vector_db, llm=mock_llm)
 
         # When: Generate answer
         generator.generate("What is authentication?")

@@ -13,7 +13,7 @@ from src.ingestion.embedder import Embedding
 class TestRetriever:
     """Tests for retriever search functionality."""
 
-    def test_search_returns_similar_chunks(self, mock_embeddings, mock_supabase_client):
+    def test_search_returns_similar_chunks(self, mock_embeddings, vector_db):
         """Test that search returns chunks similar to the query."""
         # Given: Chunks indexed in database
         chunk = ChunkRecord(
@@ -23,8 +23,8 @@ class TestRetriever:
             embedding=Embedding(vector=[0.1] * 1024),
             metadata=None
         )
-        mock_supabase_client.insert_chunk(chunk)
-        retriever = Retriever(client=mock_supabase_client)
+        vector_db.insert_chunk(chunk)
+        retriever = Retriever(client=vector_db)
 
         # When: Search for similar content
         results = retriever.search("How does MFA work?")
@@ -35,7 +35,7 @@ class TestRetriever:
         assert results[0].chunk.content == "MFA authentication requires two factors."
         assert 0.0 <= results[0].similarity <= 1.0
 
-    def test_respects_top_k_limit(self, mock_embeddings, mock_supabase_client):
+    def test_respects_top_k_limit(self, mock_embeddings, vector_db):
         """Test that search returns at most top_k results."""
         # Given: Many chunks indexed
         for i in range(10):
@@ -46,8 +46,8 @@ class TestRetriever:
                 embedding=Embedding(vector=[0.1] * 1024),
                 metadata=None
             )
-            mock_supabase_client.insert_chunk(chunk)
-        retriever = Retriever(client=mock_supabase_client)
+            vector_db.insert_chunk(chunk)
+        retriever = Retriever(client=vector_db)
 
         # When: Search with top_k=3
         results = retriever.search("query", top_k=3)
@@ -55,7 +55,7 @@ class TestRetriever:
         # Then: Returns at most 3 results
         assert len(results) == 3
 
-    def test_only_returns_active_chunks(self, mock_embeddings, mock_supabase_client):
+    def test_only_returns_active_chunks(self, mock_embeddings, vector_db):
         """Test that search only returns active chunks, not superseded."""
         # Given: Active and superseded chunks
         active_chunk = ChunkRecord(
@@ -72,9 +72,10 @@ class TestRetriever:
             embedding=Embedding(vector=[0.1] * 1024),
             metadata=None
         )
-        mock_supabase_client.chunks[("doc-1", "chunk-1", 2)] = active_chunk
-        mock_supabase_client.chunks[("doc-1", "chunk-1", 1)] = superseded_chunk
-        retriever = Retriever(client=mock_supabase_client)
+        # SQLiteClient handles unique constraints and superseding
+        vector_db.insert_chunk(superseded_chunk)
+        vector_db.insert_chunk(active_chunk)
+        retriever = Retriever(client=vector_db)
 
         # When: Search
         results = retriever.search("query")

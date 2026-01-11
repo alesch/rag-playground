@@ -23,13 +23,13 @@ def single_doc_path(corpus_path):
 
 
 @pytest.fixture
-def mock_database(mock_supabase_client, monkeypatch):
+def mock_database(vector_db, monkeypatch):
     """Patch get_db_client in ingest_corpus to use mock."""
     monkeypatch.setattr(
         "scripts.ingest_corpus.get_db_client",
-        lambda: mock_supabase_client
+        lambda: vector_db
     )
-    return mock_supabase_client
+    return vector_db
 
 
 class TestIngestionPipeline:

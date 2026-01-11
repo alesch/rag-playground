@@ -11,18 +11,18 @@ class TestOrchestrator:
     """Test suite for RAG orchestration with LangGraph."""
 
     def test_answer_single_question_end_to_end(
-        self, mock_supabase_client, mock_llm, mock_embeddings
+        self, vector_db, mock_llm, mock_embeddings
     ):
         """Answer single question and return GeneratedAnswer with citations."""
         # Given
-        mock_supabase_client.insert_chunk(ChunkRecord(
+        vector_db.insert_chunk(ChunkRecord(
             key=ChunkKey("security-doc", "auth-section", 1),
             status="active",
             content="finanso supports OAuth 2.0 and SAML authentication methods.",
             embedding=Embedding(vector=[0.1] * 1024),
             metadata=None
         ))
-        orchestrator = Orchestrator(client=mock_supabase_client, llm=mock_llm)
+        orchestrator = Orchestrator(client=vector_db, llm=mock_llm)
 
         # When
         result = orchestrator.answer("What authentication methods does finanso support?")
@@ -34,12 +34,12 @@ class TestOrchestrator:
         assert result.citations[0].key.document_id == "security-doc"
 
     def test_handle_empty_retrieval_results(
-        self, mock_supabase_client, mock_llm, mock_embeddings
+        self, vector_db, mock_llm, mock_embeddings
     ):
         """Return graceful 'not found' response without LLM call."""
         # Given
         # Empty database - no chunks inserted
-        orchestrator = Orchestrator(client=mock_supabase_client, llm=mock_llm)
+        orchestrator = Orchestrator(client=vector_db, llm=mock_llm)
 
         # When
         result = orchestrator.answer("What is the meaning of life?")
@@ -50,11 +50,11 @@ class TestOrchestrator:
         assert mock_llm.last_prompt is None  # LLM was never called
 
     def test_handle_llm_failure_gracefully(
-        self, mock_supabase_client, mock_embeddings
+        self, vector_db, mock_embeddings
     ):
         """Raise appropriate error when LLM fails."""
         # Given
-        mock_supabase_client.insert_chunk(ChunkRecord(
+        vector_db.insert_chunk(ChunkRecord(
             key=ChunkKey("doc", "chunk", 1),
             status="active",
             content="Some content",
@@ -66,25 +66,25 @@ class TestOrchestrator:
             def invoke(self, prompt: str) -> str:
                 raise RuntimeError("LLM service unavailable")
 
-        orchestrator = Orchestrator(client=mock_supabase_client, llm=FailingLLM())
+        orchestrator = Orchestrator(client=vector_db, llm=FailingLLM())
 
         # When / Then
         with pytest.raises(RuntimeError, match="LLM service unavailable"):
             orchestrator.answer("Any question?")
 
     def test_process_multiple_questions_as_batch(
-        self, mock_supabase_client, mock_llm, mock_embeddings
+        self, vector_db, mock_llm, mock_embeddings
     ):
         """Process questionnaire and return list of answers in order."""
         # Given
-        mock_supabase_client.insert_chunk(ChunkRecord(
+        vector_db.insert_chunk(ChunkRecord(
             key=ChunkKey("security-doc", "auth-section", 1),
             status="active",
             content="finanso supports OAuth 2.0 authentication.",
             embedding=Embedding(vector=[0.1] * 1024),
             metadata=None
         ))
-        orchestrator = Orchestrator(client=mock_supabase_client, llm=mock_llm)
+        orchestrator = Orchestrator(client=vector_db, llm=mock_llm)
         questions = [
             "What authentication methods are supported?",
             "How is data encrypted?",

@@ -7,7 +7,8 @@ from src.ingestion.embedder import Embedding
 from src.database.supabase_client import ChunkKey, ChunkRecord
 
 
-from tests.mocks import MockSupabaseClient, MockLLM, fake_generate_embedding, fake_generate_embeddings
+from src.database.sqlite_client import SQLiteClient
+from tests.mocks import MockLLM, fake_generate_embedding, fake_generate_embeddings
 
 
 def pytest_addoption(parser):
@@ -29,9 +30,9 @@ def pytest_collection_modifyitems(config, items):
 
 
 @pytest.fixture
-def mock_supabase_client():
-    """Provide an in-memory mock SupabaseClient for fast tests."""
-    return MockSupabaseClient()
+def vector_db():
+    """Provide an in-memory SQLiteClient for fast tests."""
+    return SQLiteClient(db_path=":memory:")
 
 
 @pytest.fixture

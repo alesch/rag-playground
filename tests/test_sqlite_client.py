@@ -22,18 +22,12 @@ class TestSQLiteClient(VectorDatabaseContract):
     @pytest.fixture(scope="module")
     def client(self):
         """
-        Fixture that creates a SQLite DB in the OS temp area.
+        Fixture that creates an in-memory SQLite DB.
         """
-        # Create a unique temp file path
-        fd, db_path = tempfile.mkstemp(suffix=".db", prefix="complaila_test_")
-        os.close(fd)
-        
-        # Initialize client
-        db_client = SQLiteClient(db_path=db_path)
+        # Initialize client with in-memory database
+        db_client = SQLiteClient(db_path=":memory:")
         
         yield db_client
         
         # Cleanup
         db_client.conn.close()
-        if os.path.exists(db_path):
-            os.remove(db_path)
