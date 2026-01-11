@@ -7,22 +7,21 @@
 
 ## Phase 5.6: Persistence Layer
 
-### Component 1: Infrastructure
+### Component 1: Schema & Initialization
 **Status**: Pending
-- [ ] Add `sqlalchemy` dependency
-- [ ] Configure database engine (SQLite/Postgres)
-- [ ] Create session management
+- [ ] Define SQL schema for domain tables
+- [ ] Update `SQLiteClient` to initialize domain tables
 
-### Component 2: Schema Definition
+### Component 2: QuestionnaireStore (SQL)
 **Status**: Pending
-- [ ] Define `questionnaires`, `questions`, `runs`, `answers` tables
-- [ ] Verify schema creation in SQLite
+- [ ] Refactor store to use `SQLiteClient`
+- [ ] Implement SQL CRUD operations
 
-### Component 3: Stores Refactoring
+### Component 3: RunStore (SQL)
 **Status**: Pending
-- [ ] Refactor `QuestionnaireStore` to use SQL repository
-- [ ] Refactor `RunStore` to use SQL repository
-- [ ] Update tests to use in-memory DB
+- [ ] Refactor store to use `SQLiteClient`
+- [ ] Implement SQL CRUD operations
+- [ ] Handle JSON serialization for complex fields
 
 ---
 
