@@ -33,6 +33,13 @@
 - ✅ Refactor `RunStore` to use relational citations instead of JSON
 - ✅ Verify cascade deletion
 
+### Component 5: Retrieved Chunks Normalization
+**Status**: Pending
+- [ ] Create `retrieved_chunks` table
+- [ ] Refactor `RunStore` to use relational chunks instead of JSON
+- [ ] Verify cascade deletion
+- [ ] Remove redundant JSON columns
+
 ---
 
 ## Phase 6: Refinement & Optimization
