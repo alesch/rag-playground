@@ -128,22 +128,28 @@ Completed tests:
 
 ---
 
-### Component 2: RunStore
-**Module**: `src/domain/answer_store.py`
-**Test File**: `tests/test_answer_store.py`
-**Status**: IN PROGRESS
+### Component 2: RunStore ✅
+**Module**: `src/domain/run_store.py`
+**Test File**: `tests/test_run_store.py`
+**Status**: All tests passing (6/6)
 
 Completed tests:
 1. ✅ Create run with full config snapshot
 2. ✅ Save answer with retrieved chunks
 3. ✅ Save answer with citations
-4. ✅ Get all answers for an answer_set
+4. ✅ Get all answers for a run
+5. ✅ Get specific answer by run + question
+6. ✅ List runs filtered by status
 
 ---
 
-### Component 3: QuestionnaireRunner
+### Component 3: QuestionnaireRunner ✅
 **Module**: `src/domain/runner.py`
 **Test File**: `tests/test_runner.py`
-**Status**: Pending
+**Status**: All tests passing (2/2)
+
+Completed tests:
+1. ✅ Run full questionnaire and save answers
+2. ✅ Handle generation errors gracefully (polymorphic AnswerFailure)
 
 ---

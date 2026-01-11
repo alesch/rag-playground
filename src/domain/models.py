@@ -76,13 +76,24 @@ class RetrievedChunk:
 
 @dataclass
 class Answer:
-    """An answer generated for a question within a run."""
-
+    """Base class for an answer outcome."""
     id: str
     run_id: str
     question_id: str
+
+
+@dataclass
+class AnswerSuccess(Answer):
+    """A successful answer generated for a question."""
+
     answer_text: str
     retrieved_chunks: List[RetrievedChunk] = field(default_factory=list)
     citations: List[Citation] = field(default_factory=list)
     query_embedding: Optional[List[float]] = None
     generation_time_ms: Optional[int] = None
+
+
+@dataclass
+class AnswerFailure(Answer):
+    """A failed answer attempt."""
+    error_message: str

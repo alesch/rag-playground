@@ -33,3 +33,14 @@ class RunStore:
     def get_answers_for_run(self, run_id: str) -> list[Answer]:
         """Retrieve all answers for a specific run."""
         return [a for a in self._answers.values() if a.run_id == run_id]
+
+    def get_answer_by_run_and_question(self, run_id: str, question_id: str) -> Optional[Answer]:
+        """Retrieve a specific answer by run ID and question ID."""
+        for answer in self._answers.values():
+            if answer.run_id == run_id and answer.question_id == question_id:
+                return answer
+        return None
+
+    def list_runs_by_status(self, status: str) -> list[Run]:
+        """List runs filtered by status."""
+        return [r for r in self._runs.values() if r.status == status]
