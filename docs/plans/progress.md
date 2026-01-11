@@ -19,11 +19,19 @@
 - ✅ Implement SQL CRUD operations
 
 ### Component 3: RunStore (SQL) ✅
-**Status**: All tests passing (8/8 in test_run_store.py & test_run_config.py)
+**Module**: `src/domain/run_store.py`
+**Test File**: `tests/test_run_store.py` & `tests/test_run_config.py`
+**Status**: All tests passing (8/8)
 - ✅ Refactor store to use `SQLiteClient`
 - ✅ Implement SQL CRUD operations
-- ✅ Handle JSON serialization for complex fields (citations, retrieved chunks)
+- ✅ Handle JSON serialization for complex fields (retrieved chunks)
 - ✅ Implement immutable `RunConfig` separation and reusability
+
+### Component 4: Citation Normalization
+**Status**: Pending
+- [ ] Create `answer_citations` table
+- [ ] Refactor `RunStore` to use relational citations instead of JSON
+- [ ] Verify cascade deletion
 
 ---
 
