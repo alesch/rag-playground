@@ -1,7 +1,7 @@
 """Domain models for questionnaires and answers."""
 
 from dataclasses import dataclass, field
-from typing import Optional, List
+from typing import Optional, List, Any
 
 
 @dataclass
@@ -19,6 +19,18 @@ class Citation:
 
     key: ChunkKey
     content_snippet: str
+
+    @staticmethod
+    def from_generated(generated_citation: Any) -> "Citation":
+        """Map a single generator citation to a domain citation."""
+        return Citation(
+            key=ChunkKey(
+                document_id=generated_citation.key.document_id,
+                chunk_id=generated_citation.key.chunk_id,
+                revision=generated_citation.key.revision
+            ),
+            content_snippet=generated_citation.content_snippet
+        )
 
 
 @dataclass
@@ -92,8 +104,30 @@ class AnswerSuccess(Answer):
     query_embedding: Optional[List[float]] = None
     generation_time_ms: Optional[int] = None
 
+    @staticmethod
+    def from_GeneratedAnswer(run_id: str, question: Question, generated_answer: Any) -> "AnswerSuccess":
+        """Factory method to create AnswerSuccess from a GeneratedAnswer."""
+        return AnswerSuccess(
+            id=f"ans-{run_id}-{question.question_id}",
+            run_id=run_id,
+            question_id=question.id,
+            answer_text=generated_answer.answer,
+            retrieved_chunks=[],  # TODO: map retrieved chunks when available in GeneratedAnswer
+            citations=[Citation.from_generated(c) for c in generated_answer.citations]
+        )
+
 
 @dataclass
 class AnswerFailure(Answer):
     """A failed answer attempt."""
     error_message: str
+
+    @staticmethod
+    def from_exception(run_id: str, question: Question, exception: Exception) -> "AnswerFailure":
+        """Factory method to create AnswerFailure from an Exception."""
+        return AnswerFailure(
+            id=f"ans-{run_id}-{question.question_id}",
+            run_id=run_id,
+            question_id=question.id,
+            error_message=str(exception)
+        )

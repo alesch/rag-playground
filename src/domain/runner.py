@@ -33,36 +33,18 @@ class QuestionnaireRunner:
                 # Generate answer
                 generated = self.orchestrator.answer(question.text)
                 
-                # Create answer object
-                answer = AnswerSuccess(
-                    id=f"ans-{run.id}-{question.question_id}",
+                # Create answer object using factory
+                answer = AnswerSuccess.from_GeneratedAnswer(
                     run_id=run.id,
-                    question_id=question.id,
-                    answer_text=generated.answer,
-                    retrieved_chunks=[], # TODO: map retrieved chunks when available in GeneratedAnswer
-                    citations=self._map_citations(generated.citations)
+                    question=question,
+                    generated_answer=generated
                 )
             except Exception as e:
-                # Create failure object
-                answer = AnswerFailure(
-                    id=f"ans-{run.id}-{question.question_id}",
+                # Create failure object using factory
+                answer = AnswerFailure.from_exception(
                     run_id=run.id,
-                    question_id=question.id,
-                    error_message=str(e)
+                    question=question,
+                    exception=e
                 )
             
             self.run_store.save_answer(answer)
-
-    def _map_citations(self, citations: list[Citation]) -> list[Citation]:
-        """Map generator citations to domain citations."""
-        return [
-            Citation(
-                key=ChunkKey(
-                    document_id=c.key.document_id,
-                    chunk_id=c.key.chunk_id,
-                    revision=c.key.revision
-                ),
-                content_snippet=c.content_snippet
-            )
-            for c in citations
-        ]
