@@ -2,14 +2,44 @@
 
 import pytest
 
-from src.domain.models import Run, AnswerSuccess, RetrievedChunk, Citation, ChunkKey
+from src.domain.models import Questionnaire, Question, Run, RunConfig, AnswerSuccess, RetrievedChunk, Citation, ChunkKey
 from src.domain.run_store import RunStore
+from src.domain.questionnaire_store import QuestionnaireStore
+from src.database.sqlite_client import SQLiteClient
 
 
-SAMPLE_RUN = Run(
-    id="run-001",
+@pytest.fixture
+def db_client():
+    return SQLiteClient(db_path=":memory:")
+
+
+@pytest.fixture
+def store(db_client):
+    """Provide a RunStore with an in-memory database."""
+    return RunStore(db_client=db_client)
+
+
+@pytest.fixture
+def questionnaire_store(db_client):
+    """Provide a QuestionnaireStore with the same database."""
+    return QuestionnaireStore(db_client=db_client)
+
+
+@pytest.fixture
+def setup_questions(questionnaire_store):
+    """Setup a questionnaire and questions to satisfy foreign keys."""
+    q = Questionnaire(id="ikea", name="Ikea")
+    questionnaire_store.save_questionnaire(q)
+    questions = [
+        Question(id="ikea:Q1.1", questionnaire_id="ikea", question_id="Q1.1", text="SOC 2?", sequence=1),
+        Question(id="ikea:Q1.2", questionnaire_id="ikea", question_id="Q1.2", text="Audit?", sequence=2),
+    ]
+    questionnaire_store.save_questions(questions)
+
+
+SAMPLE_CONFIG = RunConfig(
+    id="config-001",
     name="Baseline llama3.2",
-    description="First experiment with default settings",
     llm_model="llama3.2",
     llm_temperature=0.7,
     retrieval_top_k=5,
@@ -18,6 +48,14 @@ SAMPLE_RUN = Run(
     chunk_overlap=100,
     embedding_model="mxbai-embed-large",
     embedding_dimensions=1024,
+    description="First experiment with default settings",
+)
+
+SAMPLE_RUN = Run(
+    id="run-001",
+    config=SAMPLE_CONFIG,
+    name="Baseline llama3.2",
+    status="active"
 )
 
 SAMPLE_ANSWER = AnswerSuccess(
@@ -52,13 +90,13 @@ SAMPLE_ANSWER = AnswerSuccess(
 )
 
 
+
 class TestRunStore:
     """Test suite for RunStore."""
 
-    def test_create_run_with_full_config(self):
+    def test_create_run_with_full_config(self, store):
         """Create a run with full configuration snapshot."""
         # Given
-        store = RunStore()
 
         # When
         store.save_run(SAMPLE_RUN)
@@ -68,20 +106,19 @@ class TestRunStore:
         assert retrieved is not None
         assert retrieved.id == "run-001"
         assert retrieved.name == "Baseline llama3.2"
-        assert retrieved.llm_model == "llama3.2"
-        assert retrieved.llm_temperature == 0.7
-        assert retrieved.retrieval_top_k == 5
-        assert retrieved.similarity_threshold == 0.5
-        assert retrieved.chunk_size == 800
-        assert retrieved.chunk_overlap == 100
-        assert retrieved.embedding_model == "mxbai-embed-large"
-        assert retrieved.embedding_dimensions == 1024
+        assert retrieved.config.llm_model == "llama3.2"
+        assert retrieved.config.llm_temperature == 0.7
+        assert retrieved.config.retrieval_top_k == 5
+        assert retrieved.config.similarity_threshold == 0.5
+        assert retrieved.config.chunk_size == 800
+        assert retrieved.config.chunk_overlap == 100
+        assert retrieved.config.embedding_model == "mxbai-embed-large"
+        assert retrieved.config.embedding_dimensions == 1024
         assert retrieved.status == "active"
 
-    def test_save_answer_with_retrieved_chunks(self):
+    def test_save_answer_with_retrieved_chunks(self, store, setup_questions):
         """Save an answer with its retrieved chunks."""
         # Given
-        store = RunStore()
         store.save_run(SAMPLE_RUN)
 
         # When
@@ -98,10 +135,9 @@ class TestRunStore:
         assert retrieved.retrieved_chunks[0].similarity_score == 0.92
         assert retrieved.retrieved_chunks[1].document_id == "security-policy"
 
-    def test_save_answer_with_citations(self):
+    def test_save_answer_with_citations(self, store, setup_questions):
         """Save an answer with its citations."""
         # Given
-        store = RunStore()
         store.save_run(SAMPLE_RUN)
 
         # When
@@ -114,10 +150,9 @@ class TestRunStore:
         assert retrieved.citations[0].key.document_id == "soc2-docs"
         assert retrieved.citations[0].content_snippet == "We maintain SOC 2 Type II certification..."
 
-    def test_get_all_answers_for_run(self):
+    def test_get_all_answers_for_run(self, store, setup_questions):
         """Get all answers belonging to a specific run."""
         # Given
-        store = RunStore()
         store.save_run(SAMPLE_RUN)
 
         answer1 = AnswerSuccess(
@@ -142,10 +177,9 @@ class TestRunStore:
         assert len(answers) == 2
         assert {a.id for a in answers} == {"answer-001", "answer-002"}
 
-    def test_get_answer_by_run_and_question(self):
+    def test_get_answer_by_run_and_question(self, store, setup_questions):
         """Retrieve a specific answer by run ID and question ID."""
         # Given
-        store = RunStore()
         store.save_run(SAMPLE_RUN)
         store.save_answer(SAMPLE_ANSWER)
 
@@ -158,34 +192,24 @@ class TestRunStore:
         assert retrieved.run_id == "run-001"
         assert retrieved.question_id == "ikea:Q1.1"
 
-    def test_list_runs_by_status(self):
+    def test_list_runs_by_status(self, store):
         """List runs filtered by status."""
         # Given
-        store = RunStore()
+        config = RunConfig(
+            id="cfg-1", name="name", llm_model="m", llm_temperature=0.7,
+            retrieval_top_k=5, similarity_threshold=0.5, chunk_size=800,
+            chunk_overlap=100, embedding_model="e", embedding_dimensions=1024
+        )
         run1 = Run(
             id="run-active",
+            config=config,
             name="Active Run",
-            llm_model="model",
-            llm_temperature=0.7,
-            retrieval_top_k=5,
-            similarity_threshold=0.5,
-            chunk_size=800,
-            chunk_overlap=100,
-            embedding_model="embed",
-            embedding_dimensions=1024,
             status="active",
         )
         run2 = Run(
             id="run-archived",
+            config=config,
             name="Archived Run",
-            llm_model="model",
-            llm_temperature=0.7,
-            retrieval_top_k=5,
-            similarity_threshold=0.5,
-            chunk_size=800,
-            chunk_overlap=100,
-            embedding_model="embed",
-            embedding_dimensions=1024,
             status="archived",
         )
         store.save_run(run1)

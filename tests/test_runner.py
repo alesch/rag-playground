@@ -4,10 +4,16 @@ import pytest
 from unittest.mock import MagicMock
 
 from src.domain.runner import QuestionnaireRunner
-from src.domain.models import Questionnaire, Question, Run, ChunkKey, AnswerSuccess, AnswerFailure
+from src.domain.models import Questionnaire, Question, Run, RunConfig, ChunkKey, AnswerSuccess, AnswerFailure
 from src.generation.generator import GeneratedAnswer, Citation as GenCitation
 from src.domain.questionnaire_store import QuestionnaireStore
 from src.domain.run_store import RunStore
+from src.database.sqlite_client import SQLiteClient
+
+
+@pytest.fixture
+def db_client():
+    return SQLiteClient(db_path=":memory:")
 
 
 @pytest.fixture
@@ -16,8 +22,8 @@ def mock_orchestrator():
 
 
 @pytest.fixture
-def questionnaire_store():
-    store = QuestionnaireStore()
+def questionnaire_store(db_client):
+    store = QuestionnaireStore(db_client=db_client)
     q = Questionnaire(id="test-q", name="Test Questionnaire")
     store.save_questionnaire(q)
     store.save_questions([
@@ -28,15 +34,15 @@ def questionnaire_store():
 
 
 @pytest.fixture
-def run_store():
-    return RunStore()
+def run_store(db_client):
+    return RunStore(db_client=db_client)
 
 
 @pytest.fixture
 def run_config():
-    return Run(
-        id="run-001",
-        name="Test Run",
+    config = RunConfig(
+        id="config-001",
+        name="Test Run Config",
         llm_model="llama3.2",
         llm_temperature=0.7,
         retrieval_top_k=5,
@@ -45,6 +51,11 @@ def run_config():
         chunk_overlap=100,
         embedding_model="mxbai-embed-large",
         embedding_dimensions=1024,
+    )
+    return Run(
+        id="run-001",
+        config=config,
+        name="Test Run"
     )
 
 

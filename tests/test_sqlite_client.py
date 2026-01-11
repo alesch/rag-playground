@@ -31,3 +31,28 @@ class TestSQLiteClient(VectorDatabaseContract):
         
         # Cleanup
         db_client.conn.close()
+
+    def test_domain_tables_initialization(self, client):
+        """Verify that domain tables are created on initialization."""
+        cursor = client.conn.cursor()
+        
+        # List of expected tables
+        expected_tables = {
+            "questionnaires",
+            "questions",
+            "runs",
+            "answers",
+            "document_chunks",
+            "vec_document_chunks"
+        }
+        
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' OR type='view'")
+        tables = {row[0] for row in cursor.fetchall()}
+        
+        # Check that all expected tables exist
+        for table in expected_tables:
+            assert table in tables, f"Table {table} missing from database"
+            
+        # Verify foreign keys are enabled
+        cursor.execute("PRAGMA foreign_keys")
+        assert cursor.fetchone()[0] == 1

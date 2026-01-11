@@ -22,6 +22,9 @@ class SQLiteClient(VectorDatabaseClient):
         self.conn = sqlite3.connect(self.db_path)
         self.conn.row_factory = sqlite3.Row
         
+        # Enable foreign key support
+        self.conn.execute("PRAGMA foreign_keys = ON")
+        
         # Load sqlite-vec extension
         self.conn.enable_load_extension(True)
         sqlite_vec.load(self.conn)
@@ -33,7 +36,7 @@ class SQLiteClient(VectorDatabaseClient):
         """Initialize the database schema."""
         cursor = self.conn.cursor()
         
-        # Main table for content and metadata
+        # Vector Table (existing)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS document_chunks (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,11 +50,75 @@ class SQLiteClient(VectorDatabaseClient):
             )
         """)
         
-        # Virtual table for vector search
-        # Using rowid to link with document_chunks
+        # Virtual table for vector search (existing)
         cursor.execute(f"""
             CREATE VIRTUAL TABLE IF NOT EXISTS vec_document_chunks USING vec0(
                 embedding float[{EMBEDDING_DIMENSIONS}]
+            )
+        """)
+        
+        # Domain: Questionnaires
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS questionnaires (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                description TEXT,
+                source_file TEXT,
+                status TEXT DEFAULT 'active'
+            )
+        """)
+        
+        # Domain: Questions
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS questions (
+                id TEXT PRIMARY KEY,
+                questionnaire_id TEXT REFERENCES questionnaires(id) ON DELETE CASCADE,
+                question_id TEXT NOT NULL,
+                text TEXT NOT NULL,
+                section TEXT,
+                sequence INTEGER DEFAULT 0
+            )
+        """)
+        
+        # Domain: Runs
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS run_configurations (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                llm_model TEXT,
+                llm_temperature REAL,
+                retrieval_top_k INTEGER,
+                similarity_threshold REAL,
+                chunk_size INTEGER,
+                chunk_overlap INTEGER,
+                embedding_model TEXT,
+                embedding_dimensions INTEGER,
+                description TEXT
+            )
+        """)
+        
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS runs (
+                id TEXT PRIMARY KEY,
+                run_configuration_id TEXT REFERENCES run_configurations(id),
+                name TEXT,
+                status TEXT DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        
+        # Domain: Answers
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS answers (
+                id TEXT PRIMARY KEY,
+                run_id TEXT REFERENCES runs(id) ON DELETE CASCADE,
+                question_id TEXT REFERENCES questions(id),
+                is_success BOOLEAN NOT NULL,
+                answer_text TEXT,
+                error_message TEXT,
+                citations_json TEXT,
+                retrieved_chunks_json TEXT,
+                meta_json TEXT
             )
         """)
         

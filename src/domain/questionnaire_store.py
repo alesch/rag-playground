@@ -5,41 +5,107 @@ from pathlib import Path
 from typing import Optional
 
 from src.domain.models import Questionnaire, Question
+from src.database.sqlite_client import SQLiteClient
 
 
 class QuestionnaireStore:
     """Manages questionnaire persistence."""
 
-    def __init__(self):
-        self._questionnaires: dict[str, Questionnaire] = {}
-        self._questions: dict[str, list[Question]] = {}
+    def __init__(self, db_client: SQLiteClient):
+        self.db_client = db_client
+        self.conn = db_client.conn
 
     def save_questionnaire(self, questionnaire: Questionnaire) -> None:
         """Save a questionnaire. Raises ValueError if ID already exists."""
-        if questionnaire.id in self._questionnaires:
-            raise ValueError(f"Questionnaire '{questionnaire.id}' already exists")
-        self._questionnaires[questionnaire.id] = questionnaire
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute("""
+                INSERT INTO questionnaires (id, name, description, source_file, status)
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                questionnaire.id,
+                questionnaire.name,
+                questionnaire.description,
+                questionnaire.source_file,
+                questionnaire.status
+            ))
+            self.conn.commit()
+        except Exception as e:
+            if "UNIQUE constraint failed" in str(e):
+                raise ValueError(f"Questionnaire '{questionnaire.id}' already exists")
+            raise
 
     def get_questionnaire(self, id: str) -> Optional[Questionnaire]:
         """Retrieve a questionnaire by ID."""
-        return self._questionnaires.get(id)
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM questionnaires WHERE id = ?", (id,))
+        row = cursor.fetchone()
+        if not row:
+            return None
+        return Questionnaire(
+            id=row['id'],
+            name=row['name'],
+            description=row['description'],
+            source_file=row['source_file'],
+            status=row['status']
+        )
 
     def list_questionnaires(self, status: Optional[str] = None) -> list[Questionnaire]:
         """List questionnaires, optionally filtered by status."""
-        questionnaires = list(self._questionnaires.values())
-        if status is not None:
-            questionnaires = [q for q in questionnaires if q.status == status]
-        return questionnaires
+        cursor = self.conn.cursor()
+        if status:
+            cursor.execute("SELECT * FROM questionnaires WHERE status = ?", (status,))
+        else:
+            cursor.execute("SELECT * FROM questionnaires")
+        
+        return [
+            Questionnaire(
+                id=row['id'],
+                name=row['name'],
+                description=row['description'],
+                source_file=row['source_file'],
+                status=row['status']
+            )
+            for row in cursor.fetchall()
+        ]
 
     def save_questions(self, questions: list[Question]) -> None:
         """Save a batch of questions."""
+        cursor = self.conn.cursor()
         for q in questions:
-            self._questions.setdefault(q.questionnaire_id, []).append(q)
+            cursor.execute("""
+                INSERT OR REPLACE INTO questions (id, questionnaire_id, question_id, text, section, sequence)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+                q.id,
+                q.questionnaire_id,
+                q.question_id,
+                q.text,
+                q.section,
+                q.sequence
+            ))
+        self.conn.commit()
 
     def get_questions(self, questionnaire_id: str) -> list[Question]:
         """Retrieve all questions for a questionnaire, ordered by sequence."""
-        questions = self._questions.get(questionnaire_id, [])
-        return sorted(questions, key=lambda q: q.sequence)
+        cursor = self.conn.cursor()
+        cursor.execute("""
+            SELECT * FROM questions 
+            WHERE questionnaire_id = ? 
+            ORDER BY sequence
+        """, (questionnaire_id,))
+        
+        return [
+            Question(
+                id=row['id'],
+                questionnaire_id=row['questionnaire_id'],
+                question_id=row['question_id'],
+                text=row['text'],
+                section=row['section'],
+                sequence=row['sequence']
+            )
+            for row in cursor.fetchall()
+        ]
 
     def import_from_markdown(self, path: Path) -> tuple[Questionnaire, list[Question]]:
         """Import questionnaire and questions from a markdown file."""

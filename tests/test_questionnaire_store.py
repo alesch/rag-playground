@@ -6,15 +6,22 @@ import pytest
 
 from src.domain.models import Questionnaire, Question
 from src.domain.questionnaire_store import QuestionnaireStore
+from src.database.sqlite_client import SQLiteClient
+
+
+@pytest.fixture
+def store():
+    """Provide a QuestionnaireStore with an in-memory database."""
+    db_client = SQLiteClient(db_path=":memory:")
+    return QuestionnaireStore(db_client=db_client)
 
 
 class TestQuestionnaireStore:
     """Test suite for QuestionnaireStore."""
 
-    def test_save_and_retrieve_questionnaire_by_id(self):
+    def test_save_and_retrieve_questionnaire_by_id(self, store):
         """Save a questionnaire and retrieve it by ID."""
         # Given
-        store = QuestionnaireStore()
         questionnaire = Questionnaire(
             id="ikea-42",
             name="Ikea",
@@ -34,10 +41,9 @@ class TestQuestionnaireStore:
         assert retrieved.source_file == "data/questionnaires/ikea.md"
         assert retrieved.status == "active"
 
-    def test_save_batch_of_questions_with_sequence(self):
+    def test_save_batch_of_questions_with_sequence(self, store):
         """Save multiple questions maintaining their sequence order."""
         # Given
-        store = QuestionnaireStore()
         questionnaire = Questionnaire(
             id="ikea-42",
             name="Ikea",
@@ -83,7 +89,7 @@ class TestQuestionnaireStore:
         assert retrieved[2].question_id == "Q2.1"
         assert retrieved[2].section == "Technical Infrastructure"
 
-    def test_import_from_markdown_file(self, tmp_path):
+    def test_import_from_markdown_file(self, store, tmp_path):
         """Import questionnaire and questions from a markdown file."""
         # Given
         md_content = """# Ikea Vendor Assessment
@@ -101,8 +107,6 @@ class TestQuestionnaireStore:
         md_file = tmp_path / "ikea.md"
         md_file.write_text(md_content)
 
-        store = QuestionnaireStore()
-
         # When
         questionnaire, questions = store.import_from_markdown(md_file)
 
@@ -119,10 +123,9 @@ class TestQuestionnaireStore:
         assert questions[2].question_id == "Q2.1"
         assert questions[2].section == "Section 2: Infrastructure"
 
-    def test_list_questionnaires_filtered_by_status(self):
+    def test_list_questionnaires_filtered_by_status(self, store):
         """List questionnaires filtered by status."""
         # Given
-        store = QuestionnaireStore()
         store.save_questionnaire(Questionnaire(id="ikea-42", name="Ikea", status="active"))
         store.save_questionnaire(Questionnaire(id="volvo-01", name="Volvo", status="active"))
         store.save_questionnaire(Questionnaire(id="old-one", name="Old", status="archived"))
@@ -141,10 +144,9 @@ class TestQuestionnaireStore:
 
         assert len(all_questionnaires) == 3
 
-    def test_save_duplicate_questionnaire_raises_error(self):
+    def test_save_duplicate_questionnaire_raises_error(self, store):
         """Saving a questionnaire with existing ID raises error (insert-only)."""
         # Given
-        store = QuestionnaireStore()
         original = Questionnaire(
             id="ikea",
             name="Ikea from Sweden",

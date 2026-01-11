@@ -57,10 +57,10 @@ class Question:
 
 
 @dataclass
-class Run:
-    """A set of answers generated with a specific configuration."""
-
+class RunConfig:
+    """Configuration parameters for a run (immutable)."""
     id: str
+    name: str
     llm_model: str
     llm_temperature: float
     retrieval_top_k: int
@@ -69,9 +69,17 @@ class Run:
     chunk_overlap: int
     embedding_model: str
     embedding_dimensions: int
-    name: Optional[str] = None
     description: Optional[str] = None
+
+
+@dataclass
+class Run:
+    """A set of answers generated with a specific configuration."""
+
+    id: str
+    config: RunConfig
     status: str = "active"
+    name: Optional[str] = None  # Optional override or derivative name
 
 
 @dataclass
