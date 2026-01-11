@@ -44,6 +44,5 @@ Module: `src/domain/runner.py`
 ## Verification After implementation:
 
 1. Import questionnaire
-2. Run answer_set
+2. Trigger a run to get answers
 3. Query results
-4. Run tests
