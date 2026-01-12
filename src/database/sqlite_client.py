@@ -133,6 +133,20 @@ class SQLiteClient(VectorDatabaseClient):
             )
         """)
         
+        # Domain: Retrieved Chunks
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS retrieved_chunks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                answer_id TEXT REFERENCES answers(id) ON DELETE CASCADE,
+                document_id TEXT,
+                chunk_id TEXT,
+                revision INTEGER,
+                content TEXT,
+                similarity_score REAL,
+                rank INTEGER
+            )
+        """)
+        
         self.conn.commit()
 
     def is_connected(self) -> bool:

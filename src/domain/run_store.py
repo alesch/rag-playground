@@ -145,13 +145,8 @@ class RunStore:
             meta_json
         ))
 
-        # Save to normalized citations table
-        cursor.execute("DELETE FROM citations WHERE answer_id = ?", (answer.id,))
-        for c in answer.citations:
-            cursor.execute("""
-                INSERT INTO citations (answer_id, document_id, chunk_id, revision, content_snippet)
-                VALUES (?, ?, ?, ?, ?)
-            """, (answer.id, c.key.document_id, c.key.chunk_id, c.key.revision, c.content_snippet))
+        self._save_citations(cursor, answer.id, answer.citations)
+        self._save_retrieved_chunks(cursor, answer.id, answer.retrieved_chunks)
 
         self.conn.commit()
 
@@ -246,25 +241,8 @@ class RunStore:
     def _row_to_answer(self, row) -> Answer:
         """Convert a database row to an AnswerSuccess or AnswerFailure."""
         if row['is_success']:
-            cursor = self.conn.cursor()
-            cursor.execute("SELECT * FROM citations WHERE answer_id = ?", (row['id'],))
-            citation_rows = cursor.fetchall()
-            
-            citations = [
-                Citation(
-                    key=ChunkKey(
-                        document_id=c['document_id'],
-                        chunk_id=c['chunk_id'],
-                        revision=c['revision']
-                    ),
-                    content_snippet=c['content_snippet']
-                ) for c in citation_rows
-            ]
-            
-            retrieved_chunks = []
-            if row['retrieved_chunks_json']:
-                for c in json.loads(row['retrieved_chunks_json']):
-                    retrieved_chunks.append(RetrievedChunk(**c))
+            citations = self._load_citations(row['id'])
+            retrieved_chunks = self._load_retrieved_chunks(row['id'])
             
             meta = json.loads(row['meta_json']) if row['meta_json'] else {}
             
@@ -285,3 +263,51 @@ class RunStore:
                 question_id=row['question_id'],
                 error_message=row['error_message']
             )
+
+    def _save_citations(self, cursor, answer_id: str, citations: list[Citation]) -> None:
+        """Save citations to normalized table."""
+        cursor.execute("DELETE FROM citations WHERE answer_id = ?", (answer_id,))
+        for c in citations:
+            cursor.execute("""
+                INSERT INTO citations (answer_id, document_id, chunk_id, revision, content_snippet)
+                VALUES (?, ?, ?, ?, ?)
+            """, (answer_id, c.key.document_id, c.key.chunk_id, c.key.revision, c.content_snippet))
+
+    def _save_retrieved_chunks(self, cursor, answer_id: str, chunks: list[RetrievedChunk]) -> None:
+        """Save retrieved chunks to normalized table."""
+        cursor.execute("DELETE FROM retrieved_chunks WHERE answer_id = ?", (answer_id,))
+        for c in chunks:
+            cursor.execute("""
+                INSERT INTO retrieved_chunks (answer_id, document_id, chunk_id, revision, content, similarity_score, rank)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (answer_id, c.document_id, c.chunk_id, c.revision, c.content, c.similarity_score, c.rank))
+
+    def _load_citations(self, answer_id: str) -> list[Citation]:
+        """Load citations for a specific answer."""
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM citations WHERE answer_id = ?", (answer_id,))
+        return [
+            Citation(
+                key=ChunkKey(
+                    document_id=c['document_id'],
+                    chunk_id=c['chunk_id'],
+                    revision=c['revision']
+                ),
+                content_snippet=c['content_snippet']
+            ) for c in cursor.fetchall()
+        ]
+
+    def _load_retrieved_chunks(self, answer_id: str) -> list[RetrievedChunk]:
+        """Load retrieved chunks for a specific answer."""
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM retrieved_chunks WHERE answer_id = ?", (answer_id,))
+        return [
+            RetrievedChunk(
+                document_id=c['document_id'],
+                chunk_id=c['chunk_id'],
+                revision=c['revision'],
+                content=c['content'],
+                similarity_score=c['similarity_score'],
+                rank=c['rank']
+            ) for c in cursor.fetchall()
+        ]
