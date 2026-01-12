@@ -111,18 +111,7 @@ class RunStore:
         """Save a successful answer."""
         cursor = self.conn.cursor()
         
-        # Citations are handled separately in citatons table now.
-        
-        retrieved_chunks_json = json.dumps([
-            {
-                "document_id": c.document_id,
-                "chunk_id": c.chunk_id,
-                "revision": c.revision,
-                "content": c.content,
-                "similarity_score": c.similarity_score,
-                "rank": c.rank
-            } for c in answer.retrieved_chunks
-        ])
+        # Citations and retrieved chunks are handled separately in normalized tables.
         
         meta_json = json.dumps({
             "query_embedding": answer.query_embedding,
@@ -132,8 +121,8 @@ class RunStore:
         cursor.execute("""
             INSERT OR REPLACE INTO answers 
             (id, run_id, question_id, is_success, answer_text, error_message, 
-             retrieved_chunks_json, meta_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+             meta_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
             answer.id,
             answer.run_id,
@@ -141,7 +130,6 @@ class RunStore:
             True,
             answer.answer_text,
             None,
-            retrieved_chunks_json,
             meta_json
         ))
 
@@ -157,8 +145,8 @@ class RunStore:
         cursor.execute("""
             INSERT OR REPLACE INTO answers 
             (id, run_id, question_id, is_success, answer_text, error_message, 
-             retrieved_chunks_json, meta_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+             meta_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
             answer.id,
             answer.run_id,
@@ -166,7 +154,6 @@ class RunStore:
             False,
             None,
             answer.error_message,
-            None,
             None
         ))
         self.conn.commit()

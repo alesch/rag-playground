@@ -61,4 +61,36 @@ def test_retrieved_chunks_stored_in_normalized_table(vector_db, store, questionn
     assert rows[0]['chunk_id'] == "chunk-1"
     assert rows[0]['content'] == "Chunk content"
     assert rows[0]['similarity_score'] == 0.9
+    assert rows[0]['similarity_score'] == 0.9
     assert rows[0]['rank'] == 1
+
+def test_cascade_delete_retrieved_chunks(vector_db, store, questionnaire_store):
+    """Verify that deleting an answer (or run) cascades to retrieved_chunks."""
+    # Given
+    q = Questionnaire(id="ikea", name="Ikea")
+    questionnaire_store.save_questionnaire(q)
+    question = Question(id="ikea:Q1", questionnaire_id="ikea", question_id="Q1", text="Test?")
+    questionnaire_store.save_questions([question])
+    config = RunConfig(id="cfg-1", name="name", llm_model="m", llm_temperature=0.7, retrieval_top_k=5, similarity_threshold=0.5, chunk_size=800, chunk_overlap=100, embedding_model="e", embedding_dimensions=1024)
+    run = Run(id="run-1", config=config, name="Run 1")
+    store.save_run(run)
+    answer = AnswerSuccess(
+        id="ans-1", 
+        run_id="run-1", 
+        question_id="ikea:Q1", 
+        answer_text="Answer text", 
+        retrieved_chunks=[
+            RetrievedChunk(document_id="doc-1", chunk_id="chunk-1", revision=1, content="content", similarity_score=0.9, rank=1)
+        ]
+    )
+    store.save_answer(answer)
+    
+    # When
+    cursor = vector_db.conn.cursor()
+    cursor.execute("DELETE FROM answers WHERE id = ?", ("ans-1",))
+    vector_db.conn.commit()
+    
+    # Then
+    cursor.execute("SELECT COUNT(*) as count FROM retrieved_chunks WHERE answer_id = ?", ("ans-1",))
+    assert cursor.fetchone()['count'] == 0
+

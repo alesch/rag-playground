@@ -41,14 +41,14 @@
 - ✅ Refactor `RunStore` to use relational citations instead of JSON
 - ✅ Verify cascade deletion
 
-### Component 5: Retrieved Chunks Normalization 🚧
+### Component 5: Retrieved Chunks Normalization ✅
 
-**Status**: Cycle 1 Complete (Storage & Loading)
+**Status**: All tests passing (2/2 in test_chunks_normalization.py)
 
 - ✅ Create `retrieved_chunks` table
 - ✅ Refactor `RunStore` to use relational chunks helper methods
-- [ ] Verify cascade deletion
-- [ ] Remove redundant JSON columns
+- ✅ Verify cascade deletion
+- ✅ Remove redundant JSON columns
 
 ---
 

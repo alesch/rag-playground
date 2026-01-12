@@ -116,7 +116,6 @@ class SQLiteClient(VectorDatabaseClient):
                 is_success BOOLEAN NOT NULL,
                 answer_text TEXT,
                 error_message TEXT,
-                retrieved_chunks_json TEXT,
                 meta_json TEXT
             )
         """)
