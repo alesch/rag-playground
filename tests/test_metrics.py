@@ -1,5 +1,6 @@
 import pytest
-from src.evaluation.metrics import calculate_precision, calculate_recall, calculate_mrr
+from src.evaluation.metrics import calculate_precision, calculate_recall, calculate_mrr, AnswerRelevancyMetric
+from src.ingestion.embedder import Embedding
 
 def test_calculate_precision_at_k():
     # Given
@@ -90,3 +91,43 @@ def test_calculate_mrr_none_correct():
     # Then
     # None are relevant. MRR = 0.0
     assert actual_mrr == 0.0
+
+def test_answer_relevancy_identity():
+    # Given
+    # A simple embedder that returns the same vector for everything
+    fake_embedder = lambda text: Embedding(vector=[0.1] * 1024)
+    metric = AnswerRelevancyMetric(embedder=fake_embedder)
+
+    # When
+    score = metric.score("text", "text")
+
+    # Then
+    # Identity should always be 1.0 (even if vector is just [0.1...])
+    assert score == pytest.approx(1.0, abs=0.001)
+
+def test_answer_relevancy_math_verification():
+    # Given
+    # We want to verify the cosine similarity math:
+    # Vector A: [1.0, 0.0, ...]
+    # Vector B: [0.8, 0.6, ...] (Magnitude 1)
+    # Expected Cosine Similarity: 0.8
+    
+    vec_a = [0.0] * 1024
+    vec_a[0] = 1.0
+    vec_b = [0.0] * 1024
+    vec_b[0] = 0.8
+    vec_b[1] = 0.6
+    
+    responses = {
+        "answer": Embedding(vector=vec_a),
+        "truth": Embedding(vector=vec_b)
+    }
+    fake_embedder = lambda text: responses[text]
+    
+    metric = AnswerRelevancyMetric(embedder=fake_embedder)
+
+    # When
+    score = metric.score("answer", "truth")
+
+    # Then
+    assert score == pytest.approx(0.8, abs=0.001)

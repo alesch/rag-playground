@@ -1,4 +1,49 @@
-from typing import List, Optional
+import math
+from typing import List, Optional, Callable
+from src.ingestion.embedder import Embedding
+
+
+class AnswerRelevancyMetric:
+    """Metric class to calculate semantic similarity between answers."""
+
+    def __init__(self, embedder: Callable[[str], Embedding]):
+        """
+        Initialize with an embedding function.
+        
+        Args:
+            embedder: A function that takes a string and returns an Embedding.
+        """
+        self.embedder = embedder
+
+    def score(self, answer: str, ground_truth: str) -> float:
+        """
+        Calculate semantic similarity (cosine) between answer and ground truth.
+        """
+        if not answer or not ground_truth:
+            return 0.0
+            
+        if answer == ground_truth:
+            return 1.0
+            
+        emb_a = self.embedder(answer)
+        emb_b = self.embedder(ground_truth)
+        
+        return calculate_cosine_similarity(emb_a, emb_b)
+
+
+def calculate_cosine_similarity(emb_a: Embedding, emb_b: Embedding) -> float:
+    """Calculate cosine similarity between two Embedding objects."""
+    vec_a, vec_b = emb_a.vector, emb_b.vector
+    
+    dot_product = sum(a * b for a, b in zip(vec_a, vec_b))
+    norm_a = math.sqrt(sum(a * a for a in vec_a))
+    norm_b = math.sqrt(sum(b * b for b in vec_b))
+    
+    if norm_a == 0 or norm_b == 0:
+        return 0.0
+        
+    return dot_product / (norm_a * norm_b)
+
 
 def _get_relevant_count_at_k(retrieved_ids: List[str], expected_ids: List[str], k: Optional[int] = None) -> tuple[int, int]:
     """Helper to get (relevant_count, actual_k) for metric calculations."""

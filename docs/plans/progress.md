@@ -56,13 +56,13 @@
 
 ### Component 1: Evaluation Pipeline 🚧
 
-**Status**: Work in Progress (Precision, Recall, and MRR metrics implemented)
+**Status**: Work in Progress (All individual metrics implemented)
 
 - [ ] Implement metrics
   - [x] Precision@K
   - [x] Recall@K
   - [x] MRR
-  - [ ] Answer Relevancy (Semantic similarity)
+  - [x] Answer Relevancy (Semantic similarity)
 - [ ] Automate evaluation against `model_comparison.csv` ground truth
 
 ### Component 2: Orchestration Refinement
