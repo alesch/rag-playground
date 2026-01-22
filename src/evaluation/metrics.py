@@ -52,3 +52,26 @@ def calculate_recall(retrieved_ids: List[str], expected_ids: List[str], k: Optio
         
     relevant_count, _ = _get_relevant_count_at_k(retrieved_ids, expected_ids, k)
     return relevant_count / len(expected_ids)
+
+
+def calculate_mrr(retrieved_ids: List[str], expected_ids: List[str]) -> float:
+    """
+    Calculate Mean Reciprocal Rank (MRR).
+    
+    Args:
+        retrieved_ids: List of retrieved document IDs in order of relevance.
+        expected_ids: List of ground truth relevant document IDs.
+        
+    Returns:
+        The MRR score as a float (1.0/rank of first relevant document, or 0.0).
+    """
+    if not retrieved_ids or not expected_ids:
+        return 0.0
+        
+    expected_set = set(expected_ids)
+    
+    for i, doc_id in enumerate(retrieved_ids, 1):
+        if doc_id in expected_set:
+            return 1.0 / i
+            
+    return 0.0
