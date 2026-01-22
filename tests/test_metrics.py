@@ -1,5 +1,5 @@
 import pytest
-from src.evaluation.metrics import calculate_precision
+from src.evaluation.metrics import calculate_precision, calculate_recall
 
 def test_calculate_precision_at_k():
     # Given
@@ -25,3 +25,31 @@ def test_calculate_precision_all():
     # Then
     # All 4 are checked. "doc1" and "doc2" are in expected_ids. 2/4 = 0.5
     assert actual_precision == 0.5
+
+def test_calculate_recall_at_k():
+    # Given
+    retrieved_ids = ["doc1", "doc3", "doc2", "doc4"]
+    expected_ids = ["doc1", "doc2", "doc5"]
+    k = 2
+
+    # When
+    actual_recall = calculate_recall(retrieved_ids, expected_ids, k=k)
+
+    # Then
+    # Top 2 are ["doc1", "doc3"]. Only "doc1" is in expected_ids. 
+    # Total expected is 3. 1/3 = 0.333...
+    assert actual_recall == pytest.approx(0.333, abs=0.001)
+
+def test_calculate_recall_all():
+    # Given
+    retrieved_ids = ["doc1", "doc3", "doc2", "doc4"]
+    expected_ids = ["doc1", "doc2", "doc5"]
+
+    # When
+    actual_recall = calculate_recall(retrieved_ids, expected_ids)
+
+    # Then
+    # All 4 retrieved: ["doc1", "doc3", "doc2", "doc4"]
+    # Expected: ["doc1", "doc2", "doc5"]
+    # Found: ["doc1", "doc2"] (2 out of 3)
+    assert actual_recall == pytest.approx(0.666, abs=0.001)

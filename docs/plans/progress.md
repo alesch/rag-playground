@@ -56,11 +56,11 @@
 
 ### Component 1: Evaluation Pipeline 🚧
 
-**Status**: Work in Progress (Precision metric implemented)
+**Status**: Work in Progress (Precision and Recall metrics implemented)
 
 - [ ] Implement metrics
   - [x] Precision@K
-  - [ ] Recall@K
+  - [x] Recall@K
   - [ ] MRR
   - [ ] Answer Relevancy (Semantic similarity)
 - [ ] Automate evaluation against `model_comparison.csv` ground truth
