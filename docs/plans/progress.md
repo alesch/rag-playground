@@ -52,13 +52,17 @@
 
 ---
 
-## Phase 6: Refinement & Optimization
+## Phase 6: Refinement & Optimization 🚧
 
-### Component 1: Evaluation Pipeline
+### Component 1: Evaluation Pipeline 🚧
 
-**Status**: Pending
+**Status**: Work in Progress (Precision metric implemented)
 
-- [ ] Implement metrics (Precision, Recall, Answer Relevancy)
+- [ ] Implement metrics
+  - [x] Precision@K
+  - [ ] Recall@K
+  - [ ] MRR
+  - [ ] Answer Relevancy (Semantic similarity)
 - [ ] Automate evaluation against `model_comparison.csv` ground truth
 
 ### Component 2: Orchestration Refinement
