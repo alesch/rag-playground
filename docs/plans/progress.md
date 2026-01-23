@@ -56,14 +56,16 @@
 
 ### Component 1: Evaluation Pipeline 🚧
 
-**Status**: Work in Progress (All individual metrics implemented)
+**Status**: Work in Progress (Metrics and Ground Truth imported)
 
-- [ ] Implement metrics
+- [x] Implement metrics
   - [x] Precision@K
   - [x] Recall@K
   - [x] MRR
   - [x] Answer Relevancy (Semantic similarity)
-- [ ] Automate evaluation against `model_comparison.csv` ground truth
+- [x] Establish and import Ground Truth (NotebookLM output)
+- [x] Automate evaluation runner logic (`RAGEvaluator`)
+- [ ] Create evaluation CLI/CLI tool
 
 ### Component 2: Orchestration Refinement
 
