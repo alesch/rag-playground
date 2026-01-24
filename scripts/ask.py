@@ -6,6 +6,10 @@ Usage:
     python scripts/ask.py                              # Interactive mode
     python scripts/ask.py "Your question"             # Single question mode
     python scripts/ask.py questionnaire.md            # Process questionnaire file
+
+NOTE: This script is for interactive play and quick testing.
+It does NOT persist answers to the database or trigger formal evaluations.
+To run a persisted evaluation, use `scripts/run_evaluation.py`.
 """
 
 import re
