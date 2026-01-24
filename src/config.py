@@ -40,7 +40,7 @@ SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
 
 OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_EMBEDDING_MODEL: str = os.getenv("OLLAMA_EMBEDDING_MODEL", "mxbai-embed-large")
-OLLAMA_CHAT_MODEL: str = os.getenv("OLLAMA_CHAT_MODEL", "llama3.1")
+OLLAMA_CHAT_MODEL: str = os.getenv("OLLAMA_CHAT_MODEL", "llama3.2")
 
 # Embedding dimensions for mxbai-embed-large
 EMBEDDING_DIMENSIONS: int = 1024

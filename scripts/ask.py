@@ -14,21 +14,22 @@ To run a persisted evaluation, use `scripts/run_evaluation.py`.
 
 import re
 import sys
+import argparse
 from pathlib import Path
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from langchain_ollama import OllamaLLM
-from src.config import OLLAMA_BASE_URL, OLLAMA_CHAT_MODEL
-from src.database.supabase_client import SupabaseClient
+from src.config import OLLAMA_BASE_URL, OLLAMA_CHAT_MODEL, SQLITE_DB_PATH
+from src.database.factory import get_db_client
 from src.orchestration.orchestrator import Orchestrator
 
 
-def create_orchestrator() -> Orchestrator:
+def create_orchestrator(model: str = OLLAMA_CHAT_MODEL) -> Orchestrator:
     """Create an Orchestrator with real dependencies."""
-    client = SupabaseClient()
-    llm = OllamaLLM(base_url=OLLAMA_BASE_URL, model=OLLAMA_CHAT_MODEL)
+    client = get_db_client()
+    llm = OllamaLLM(base_url=OLLAMA_BASE_URL, model=model)
     return Orchestrator(client=client, llm=llm)
 
 
@@ -150,23 +151,30 @@ def questionnaire_mode(orchestrator: Orchestrator, questionnaire_path: Path):
 
 def main():
     """Main entry point."""
-    print("Initializing Complaila RAG system...")
+    parser = argparse.ArgumentParser(description="Interactive CLI for the Complaila RAG system.")
+    parser.add_argument("--model", type=str, default=OLLAMA_CHAT_MODEL, help=f"Ollama model to use (default: {OLLAMA_CHAT_MODEL})")
+    parser.add_argument("query", nargs="*", help="A question or a path to a markdown questionnaire file")
+    args = parser.parse_args()
+
+    print(f"Initializing Complaila RAG system with model: {args.model}...")
 
     try:
-        orchestrator = create_orchestrator()
+        orchestrator = create_orchestrator(model=args.model)
     except Exception as e:
         print(f"Error initializing: {e}")
         sys.exit(1)
 
-    if len(sys.argv) > 1:
-        arg = sys.argv[1]
-        # Check if argument is a markdown file (questionnaire mode)
-        if arg.endswith('.md') and Path(arg).exists():
-            questionnaire_mode(orchestrator, Path(arg))
+    if args.query:
+        # Join multiple query parts if they weren't quoted
+        query_str = " ".join(args.query)
+        
+        # Check if the query is a path to a markdown file
+        potential_path = Path(query_str)
+        if query_str.endswith('.md') and potential_path.exists():
+            questionnaire_mode(orchestrator, potential_path)
         else:
             # Single question mode
-            question = " ".join(sys.argv[1:])
-            single_question_mode(orchestrator, question)
+            single_question_mode(orchestrator, query_str)
     else:
         # Interactive mode
         interactive_mode(orchestrator)
