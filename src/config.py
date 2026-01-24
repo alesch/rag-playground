@@ -27,6 +27,10 @@ LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=LOG_LEVEL, format=LOG_FORMAT)
 logger = logging.getLogger("complaila")
 
+# Suppress noisy library logs
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+
 # ============================================================================
 # Supabase Configuration
 # ============================================================================

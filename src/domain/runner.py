@@ -28,7 +28,9 @@ class QuestionnaireRunner:
         # Save the run configuration first
         self.run_store.save_run(run)
 
-        for question in questions:
+        total = len(questions)
+        for i, question in enumerate(questions, 1):
+            print(f"[{i}/{total}] Processing question: {question.id}...")
             try:
                 # Generate answer
                 generated = self.orchestrator.answer(question.text)
