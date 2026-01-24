@@ -59,4 +59,24 @@ Parses external reference answers (e.g., from NotebookLM) in `tests/output-noteb
 python scripts/import_ground_truth.py
 ```
 
+### `ingest_questionnaire.py`
+
+Imports a markdown questionnaire into the database, preserving section titles and question ordering.
+
+**Usage:**
+
+```bash
+python scripts/ingest_questionnaire.py data/questionnaires/sample_questionnaire.md
+```
+
 ---
+
+### `reset_evaluation_data.py`
+
+A utility script to "hard reset" evaluation data in the database. Use this to delete questionnaires and runs if you need to perform a clean re-import.
+
+**Usage:**
+
+```bash
+python scripts/reset_evaluation_data.py
+```

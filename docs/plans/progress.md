@@ -63,7 +63,7 @@
   - ✅ Recall@K
   - ✅ MRR
   - ✅ Answer Relevancy (Semantic similarity)
-- ✅ Establish and import Ground Truth (NotebookLM output)
+- ✅ Establish and import Ground Truth (NotebookLM output with section/order preservation)
 - ✅ Automate evaluation runner logic (`RAGEvaluator`)
 - ✅ Create evaluation CLI tool (`run_evaluation.py`)
 

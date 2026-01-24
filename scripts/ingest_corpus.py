@@ -4,9 +4,15 @@ Ingestion pipeline for processing corpus documents into Supabase.
 Orchestrates: Document Loading → Chunking → Embedding → Storage
 """
 
-from dataclasses import dataclass
+import sys
+import os
 from pathlib import Path
+from dataclasses import dataclass
 from typing import List
+
+# Add project root to sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from src.ingestion.document_loader import load_document, load_corpus as load_corpus_documents, Document
 from src.ingestion.chunker import chunk_document, Chunk
 from src.ingestion.embedder import generate_embeddings, Embedding
@@ -131,3 +137,25 @@ def ingest_corpus(corpus_path: Path) -> CorpusIngestionResult:
         total_chunks_stored=total_chunks_stored,
         document_results=document_results
     )
+
+
+def main():
+    """Main entry point for corpus ingestion."""
+    from src.config import CORPUS_PATH
+    
+    print(f"Starting corpus ingestion from {CORPUS_PATH}...")
+    try:
+        result = ingest_corpus(CORPUS_PATH)
+        print(f"\n✅ Ingestion completed!")
+        print(f"   Documents processed: {result.documents_processed}")
+        print(f"   Total chunks stored: {result.total_chunks_stored}")
+        print("\nPer-document breakdown:")
+        for doc in result.document_results:
+            print(f"   - {doc.document_id}: {doc.chunks_stored} chunks")
+    except Exception as e:
+        print(f"❌ Error during ingestion: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
