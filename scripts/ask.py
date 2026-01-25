@@ -26,10 +26,10 @@ from src.database.factory import get_db_client
 from src.orchestration.orchestrator import Orchestrator
 
 
-def create_orchestrator(model: str = OLLAMA_CHAT_MODEL) -> Orchestrator:
+def create_orchestrator(model: str = OLLAMA_CHAT_MODEL, temperature: float = 0.0) -> Orchestrator:
     """Create an Orchestrator with real dependencies."""
     client = get_db_client()
-    llm = OllamaLLM(base_url=OLLAMA_BASE_URL, model=model)
+    llm = OllamaLLM(base_url=OLLAMA_BASE_URL, model=model, temperature=temperature)
     return Orchestrator(client=client, llm=llm)
 
 
@@ -153,13 +153,14 @@ def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Interactive CLI for the Complaila RAG system.")
     parser.add_argument("--model", type=str, default=OLLAMA_CHAT_MODEL, help=f"Ollama model to use (default: {OLLAMA_CHAT_MODEL})")
+    parser.add_argument("--temperature", type=float, default=0.0, help="LLM temperature (default: 0.0)")
     parser.add_argument("query", nargs="*", help="A question or a path to a markdown questionnaire file")
     args = parser.parse_args()
 
-    print(f"Initializing Complaila RAG system with model: {args.model}...")
+    print(f"Initializing Complaila RAG system with model: {args.model} (temp: {args.temperature})...")
 
     try:
-        orchestrator = create_orchestrator(model=args.model)
+        orchestrator = create_orchestrator(model=args.model, temperature=args.temperature)
     except Exception as e:
         print(f"Error initializing: {e}")
         sys.exit(1)

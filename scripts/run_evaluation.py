@@ -6,8 +6,12 @@ Runs a questionnaire through the RAG pipeline and compares it to ground truth.
 
 import argparse
 import uuid
+import sys
 from datetime import datetime
 from pathlib import Path
+
+# Add the project root to sys.path to allow importing from src
+sys.path.append(str(Path(__file__).parent.parent))
 
 from langchain_ollama import OllamaLLM
 from src.config import OLLAMA_BASE_URL, OLLAMA_CHAT_MODEL, SQLITE_DB_PATH, OLLAMA_EMBEDDING_MODEL
@@ -29,7 +33,8 @@ def main():
 
     # 1. Setup Dependencies
     db_client = SQLiteClient(str(SQLITE_DB_PATH))
-    llm = OllamaLLM(base_url=OLLAMA_BASE_URL, model=args.model)
+    temp = 0
+    llm = OllamaLLM(base_url=OLLAMA_BASE_URL, model=args.model, temperature=temp)
     orchestrator = Orchestrator(client=db_client, llm=llm)
     
     q_store = QuestionnaireStore(db_client)
@@ -48,7 +53,7 @@ def main():
         id=f"config-{run_id}",
         name=f"Eval run {args.model}",
         llm_model=args.model,
-        llm_temperature=0,
+        llm_temperature=temp,
         retrieval_top_k=args.top_k,
         similarity_threshold=0,
         chunk_size=800,
