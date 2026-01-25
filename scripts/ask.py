@@ -22,15 +22,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from langchain_ollama import OllamaLLM
 from src.config import OLLAMA_BASE_URL, OLLAMA_CHAT_MODEL, SQLITE_DB_PATH
-from src.database.factory import get_db_client
+from src.utils.cli import print_banner, setup_orchestrator
 from src.orchestration.orchestrator import Orchestrator
 
 
-def create_orchestrator(model: str = OLLAMA_CHAT_MODEL, temperature: float = 0.0) -> Orchestrator:
-    """Create an Orchestrator with real dependencies."""
-    client = get_db_client()
-    llm = OllamaLLM(base_url=OLLAMA_BASE_URL, model=model, temperature=temperature)
-    return Orchestrator(client=client, llm=llm)
+# create_orchestrator removed in favor of setup_orchestrator from src.utils.cli
 
 
 def print_answer(result):
@@ -157,10 +153,15 @@ def main():
     parser.add_argument("query", nargs="*", help="A question or a path to a markdown questionnaire file")
     args = parser.parse_args()
 
-    print(f"Initializing Complaila RAG system with model: {args.model} (temp: {args.temperature})...")
+    print_banner("COMPLAILA RAG SYSTEM", {
+        "Model": args.model,
+        "Temperature": args.temperature,
+        "Base URL": OLLAMA_BASE_URL,
+        "DB Path": SQLITE_DB_PATH
+    })
 
     try:
-        orchestrator = create_orchestrator(model=args.model, temperature=args.temperature)
+        _, orchestrator = setup_orchestrator(model=args.model, temperature=args.temperature)
     except Exception as e:
         print(f"Error initializing: {e}")
         sys.exit(1)

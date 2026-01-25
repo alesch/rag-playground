@@ -7,6 +7,7 @@ Runs a questionnaire through the RAG pipeline and compares it to ground truth.
 import argparse
 import uuid
 import sys
+from typing import cast
 from datetime import datetime
 from pathlib import Path
 
@@ -15,6 +16,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from langchain_ollama import OllamaLLM
 from src.config import OLLAMA_BASE_URL, OLLAMA_CHAT_MODEL, SQLITE_DB_PATH, OLLAMA_EMBEDDING_MODEL
+from src.utils.cli import print_banner, setup_orchestrator
 from src.database.sqlite_client import SQLiteClient
 from src.domain.models import Run, RunConfig
 from src.domain.questionnaire_store import QuestionnaireStore
@@ -32,22 +34,27 @@ def main():
     args = parser.parse_args()
 
     # 1. Setup Dependencies
-    db_client = SQLiteClient(str(SQLITE_DB_PATH))
     temp = 0
-    llm = OllamaLLM(base_url=OLLAMA_BASE_URL, model=args.model, temperature=temp)
-    orchestrator = Orchestrator(client=db_client, llm=llm)
+    db_client, orchestrator = setup_orchestrator(model=args.model, temperature=temp)
+    # Cast to SQLiteClient for specialized stores
+    sqlite_client = cast(SQLiteClient, db_client)
     
-    q_store = QuestionnaireStore(db_client)
-    run_store = RunStore(db_client)
+    q_store = QuestionnaireStore(sqlite_client)
+    run_store = RunStore(sqlite_client)
     runner = QuestionnaireRunner(orchestrator, q_store, run_store)
     
-    # 2. Configure Run
     run_id = f"eval-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
     questionnaire_id = "sample_questionnaire"
     run_name = args.name or f"Auto Evaluation - {args.model}"
     
-    print(f"Starting evaluation run: {run_id}")
-    print(f"Model: {args.model}")
+    print_banner("COMPLAILA EVALUATION RUNNER", {
+        "Run ID": run_id,
+        "Model": args.model,
+        "Temperature": temp,
+        "Top-K": args.top_k,
+        "Base URL": OLLAMA_BASE_URL,
+        "DB Path": SQLITE_DB_PATH
+    })
     
     config = RunConfig(
         id=f"config-{run_id}",
