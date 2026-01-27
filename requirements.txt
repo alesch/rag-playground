@@ -1,20 +1,11 @@
-# LLM and Embeddings
+# Core LLM & Orchestration (Minimal)
 langchain-ollama>=0.1.0
-langchain>=0.3.0
 langgraph>=0.2.0
+langchain-text-splitters>=0.3.0
 
-# Database
-supabase>=2.0.0
-pgvector>=0.2.0
+# Database (Production uses SQLite on Volume)
 sqlite-vec>=0.1.0
-
-# Document Processing
-langchain-community>=0.3.0
 
 # Utilities
 python-dotenv>=1.0.0
-jupyter>=1.0.0
 python-frontmatter>=1.0.0
-
-# Testing
-pytest>=7.0.0

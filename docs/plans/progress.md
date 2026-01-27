@@ -81,3 +81,23 @@
 - [ ] Optimize chunk sizes and overlap
 - [ ] Tune retrieval `top_k` and similarity thresholds
 - [ ] Refine LLM prompts
+
+---
+
+## Phase 7: Infrastructure & Deployment 🚧
+
+### Component 1: DigitalOcean Setup ✅
+
+**Status**: doctl authenticated, Python-slim Dockerfile created.
+
+- ✅ Install and authenticate `doctl`
+- ✅ Create `Dockerfile` (Python-slim) and `.dockerignore`
+- ✅ Create `scripts/entrypoint.sh` for automatic Ollama startup
+- ✅ Create DigitalOcean Container Registry (`alesch-registry`)
+- ✅ Build lean Docker image (301 MB)
+- ✅ Push image to DOCR
+- ✅ Setup persistent Volume for models (20GB in NYC3)
+- ✅ Create initial setup Droplet
+- ✅ Download models to Volume (DeepSeek, Llama3, Gemma, etc.)
+- ✅ Create data directory and upload initial DB
+- [ ] Create automation scripts

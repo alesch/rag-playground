@@ -43,9 +43,12 @@ complaila/
 │   ├── 04_generate_answers.ipynb
 │   └── 05_full_pipeline.ipynb
 ├── scripts/
-│   ├── init_db.py                      # Initialize database
-│   ├── ingest_corpus.py                # Ingest all documents
-│   └── answer_questionnaire.py         # Process questionnaire
+│   ├── ask.py                          # Simple CLI for querying the RAG system
+│   ├── ingest_corpus.py                # Ingest all documents into the vector store
+│   ├── ingest_questionnaire.py         # Ingest a questionnaire for processing
+│   ├── run_evaluation.py               # Run RAG evaluation metrics
+│   ├── import_ground_truth.py          # Import ground truth data for evaluation
+│   └── entrypoint.sh                   # Docker entrypoint (starts Ollama)
 └── tests/
     ├── __init__.py
     ├── test_chunker.py
