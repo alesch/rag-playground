@@ -69,7 +69,7 @@ MIN_CHUNK_SIZE: int = 100  # Minimum chunk size to avoid too-small fragments
 DB_PROVIDER: str = os.getenv("DB_PROVIDER", "sqlite")
 
 # SQLite configuration
-SQLITE_DB_PATH: Path = PROJECT_ROOT / "data" / "complaila.db"
+SQLITE_DB_PATH: Path = Path(os.getenv("SQLITE_DB_PATH", str(PROJECT_ROOT / "data" / "complaila.db")))
 
 # Table name for storing document chunks
 CHUNKS_TABLE: str = "document_chunks"
