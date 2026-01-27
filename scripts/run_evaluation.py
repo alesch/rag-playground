@@ -34,7 +34,7 @@ def main():
     args = parser.parse_args()
 
     # 1. Setup Dependencies
-    temp = 0
+    temp = 0.8
     db_client, orchestrator = setup_orchestrator(model=args.model, temperature=temp)
     # Cast to SQLiteClient for specialized stores
     sqlite_client = cast(SQLiteClient, db_client)

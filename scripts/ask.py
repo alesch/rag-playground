@@ -149,7 +149,7 @@ def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Interactive CLI for the Complaila RAG system.")
     parser.add_argument("--model", type=str, default=OLLAMA_CHAT_MODEL, help=f"Ollama model to use (default: {OLLAMA_CHAT_MODEL})")
-    parser.add_argument("--temperature", type=float, default=0.0, help="LLM temperature (default: 0.0)")
+    parser.add_argument("--temperature", type=float, default=0.8, help="LLM temperature (default: 0.8)")
     parser.add_argument("query", nargs="*", help="A question or a path to a markdown questionnaire file")
     args = parser.parse_args()
 
