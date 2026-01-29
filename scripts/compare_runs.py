@@ -49,19 +49,6 @@ def main():
     print("=" * 140)
     
     for run in runs:
-        # Get mean answer relevancy from evaluation results if available
-        cursor.execute("""
-            SELECT AVG(
-                json_extract(meta_json, '$.answer_relevancy')
-            ) as mean_relevancy
-            FROM answers
-            WHERE run_id = ? AND is_success = 1
-            AND meta_json LIKE '%answer_relevancy%'
-        """, (run['run_id'],))
-        
-        result = cursor.fetchone()
-        mean_relevancy = result['mean_relevancy'] if result and result['mean_relevancy'] else None
-        
         # Get answer count
         cursor.execute("""
             SELECT COUNT(*) as count
@@ -71,14 +58,24 @@ def main():
         
         answer_count = cursor.fetchone()['count']
         
+        # Get evaluation metrics from stored reports
+        cursor.execute("""
+            SELECT mean_answer_relevancy
+            FROM evaluation_reports
+            WHERE run_id = ?
+        """, (run['run_id'],))
+        
+        eval_result = cursor.fetchone()
+        mean_relevancy = eval_result['mean_answer_relevancy'] if eval_result else None
+        
         print(f"{run['run_id']:<25} {run['name'][:29]:<30} {run['llm_model']:<12} "
               f"{run['llm_temperature']:<6.1f} {run['retrieval_top_k']:<6} "
               f"{run['similarity_threshold']:<7.1f} {run['created_at']:<20}")
         
-        if mean_relevancy:
+        if mean_relevancy is not None:
             print(f"  → Answers: {answer_count}, Mean Relevancy: {mean_relevancy:.4f}")
         else:
-            print(f"  → Answers: {answer_count} (no evaluation metrics)")
+            print(f"  → Answers: {answer_count} (not evaluated)")
         print()
     
     print("=" * 140)

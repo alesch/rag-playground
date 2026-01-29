@@ -24,6 +24,7 @@ from src.domain.run_store import RunStore
 from src.domain.runner import QuestionnaireRunner
 from src.orchestration.orchestrator import Orchestrator
 from src.evaluation.evaluator import RAGEvaluator
+from src.evaluation.evaluation_store import EvaluationStore
 from src.ingestion.embedder import generate_embedding
 
 def main():
@@ -92,6 +93,10 @@ def main():
     
     evaluator = RAGEvaluator(run_store=run_store, embedder=generate_embedding)
     report = evaluator.evaluate_run(run_id, gt_run_id)
+    
+    # Save evaluation report to database
+    eval_store = EvaluationStore(sqlite_client)
+    eval_store.save_report(report)
     
     # 5. Output Results
     print("\n" + "=" * 60)

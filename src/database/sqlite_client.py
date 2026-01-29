@@ -146,6 +146,27 @@ class SQLiteClient(VectorDatabaseClient):
             )
         """)
         
+        # Evaluation: Reports
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS evaluation_reports (
+                id TEXT PRIMARY KEY,
+                run_id TEXT REFERENCES runs(id) ON DELETE CASCADE,
+                ground_truth_run_id TEXT REFERENCES runs(id),
+                mean_answer_relevancy REAL,
+                evaluated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        
+        # Evaluation: Question Results
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS evaluation_question_results (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                report_id TEXT REFERENCES evaluation_reports(id) ON DELETE CASCADE,
+                question_id TEXT,
+                answer_relevancy REAL
+            )
+        """)
+        
         self.conn.commit()
 
     def is_connected(self) -> bool:
