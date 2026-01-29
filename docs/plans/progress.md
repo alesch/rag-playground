@@ -76,10 +76,13 @@
 
 ### Component 3: Performance Tuning
 
-**Status**: Pending
+**Status**: In Progress
 
-- [ ] Optimize chunk sizes and overlap
-- [ ] Tune retrieval `top_k` and similarity thresholds
+- [x] Create short test questionnaire (3 questions for rapid iteration)
+- [x] Establish baseline metrics (Mean Relevancy: 0.8780)
+- [ ] Optimize retrieval parameters (top_k, similarity threshold)
+- [ ] Optimize LLM parameters (temperature, model selection)
+- [ ] Optimize chunk sizes and overlap (requires re-ingestion)
 - [ ] Refine LLM prompts
 
 ---

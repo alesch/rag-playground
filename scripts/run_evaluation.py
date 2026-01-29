@@ -31,10 +31,13 @@ def main():
     parser.add_argument("--model", type=str, default=OLLAMA_CHAT_MODEL, help=f"Ollama model to use (default: {OLLAMA_CHAT_MODEL})")
     parser.add_argument("--name", type=str, help="Optional name for the run")
     parser.add_argument("--top-k", type=int, default=5, help="Number of chunks to retrieve (default: 5)")
+    parser.add_argument("--questionnaire", type=str, default="sample_questionnaire", help="Questionnaire ID to evaluate (default: sample_questionnaire)")
+    parser.add_argument("--temp", type=float, default=0.8, help="LLM temperature (default: 0.8)")
+    parser.add_argument("--threshold", type=float, default=0.0, help="Similarity threshold (default: 0.0)")
     args = parser.parse_args()
 
     # 1. Setup Dependencies
-    temp = 0.8
+    temp = args.temp
     db_client, orchestrator = setup_orchestrator(model=args.model, temperature=temp)
     # Cast to SQLiteClient for specialized stores
     sqlite_client = cast(SQLiteClient, db_client)
@@ -44,14 +47,23 @@ def main():
     runner = QuestionnaireRunner(orchestrator, q_store, run_store)
     
     run_id = f"eval-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
-    questionnaire_id = "sample_questionnaire"
+    questionnaire_id = args.questionnaire
+    
+    # Determine ground truth run ID based on questionnaire
+    if questionnaire_id == "test_questionnaire_short":
+        gt_run_id = "ground_truth_notebooklm_short"
+    else:
+        gt_run_id = "ground_truth_notebooklm"
+    
     run_name = args.name or f"Auto Evaluation - {args.model}"
     
     print_banner("COMPLAILA EVALUATION RUNNER", {
         "Run ID": run_id,
+        "Questionnaire": questionnaire_id,
         "Model": args.model,
         "Temperature": temp,
         "Top-K": args.top_k,
+        "Threshold": args.threshold,
         "Base URL": OLLAMA_BASE_URL,
         "DB Path": SQLITE_DB_PATH
     })
@@ -62,7 +74,7 @@ def main():
         llm_model=args.model,
         llm_temperature=temp,
         retrieval_top_k=args.top_k,
-        similarity_threshold=0,
+        similarity_threshold=args.threshold,
         chunk_size=800,
         chunk_overlap=100,
         embedding_model=OLLAMA_EMBEDDING_MODEL,
@@ -76,7 +88,6 @@ def main():
     runner.run_questionnaire(questionnaire_id, run)
     
     # 4. Evaluate against Ground Truth
-    gt_run_id = "ground_truth_notebooklm"
     print(f"Comparing results against ground truth ('{gt_run_id}')...")
     
     evaluator = RAGEvaluator(run_store=run_store, embedder=generate_embedding)
@@ -87,7 +98,7 @@ def main():
     print("  EVALUATION RESULTS")
     print("=" * 60)
     print(f"Run ID: {run_id}")
-    print(f"Model:  {OLLAMA_CHAT_MODEL}")
+    print(f"Model:  {args.model} (temp={temp}, top_k={args.top_k}, threshold={args.threshold})")
     print(f"Ground Truth: {gt_run_id}")
     print("-" * 60)
     
