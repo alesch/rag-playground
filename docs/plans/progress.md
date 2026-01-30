@@ -87,8 +87,8 @@
 - [x] Create validation scripts (TDD tested)
 - [x] Validate on full 50-question: baseline BEATS optimized (-1.47%)
 - [x] Plan revised experiment strategy (7 configs × 3 trials)
-- [x] ExperimentRunner: Test 1/6 passing (happy path structure)
-- [ ] Complete ExperimentRunner TDD (5 tests remaining)
+- [x] ExperimentRunner: Test 2/6 passing (orchestrator calls + DB persistence)
+- [ ] Complete ExperimentRunner TDD (4 tests remaining)
 - [ ] Run overnight experiment suite (21 experiments, ~8 hours)
 - [ ] Analyze results and update config with validated parameters
 - [ ] Document final validated findings

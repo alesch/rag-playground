@@ -1,5 +1,7 @@
 """Experiment runner for performance tuning trials."""
 
+from src.domain.models import Run, AnswerSuccess
+
 
 class ExperimentRunner:
     """Orchestrates multiple experiment trials."""
@@ -12,8 +14,18 @@ class ExperimentRunner:
     
     def run_experiment(self, questionnaire_id, ground_truth_run_id, config):
         """Run single experiment and return results."""
+        run = Run(id=f"run-{config.id}", config=config)
+        self.run_store.save_run(run)
+        
+        questions = self.questionnaire_store.get_questions(questionnaire_id)
+        
+        for question in questions:
+            generated_answer = self.orchestrator.answer(question.text)
+            answer = AnswerSuccess.from_GeneratedAnswer(run.id, question, generated_answer)
+            answer.save_on(self.run_store)
+        
         return {
-            "run_id": "fake-run-id",
-            "questions_answered": 3,
+            "run_id": run.id,
+            "questions_answered": len(questions),
             "success": True
         }

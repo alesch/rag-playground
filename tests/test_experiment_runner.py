@@ -88,6 +88,72 @@ def ground_truth_run(run_store, questionnaire_store):
 class TestExperimentRunner:
     """Test suite for ExperimentRunner."""
     
+    def test_orchestrator_called_and_answers_saved(
+        self, mock_orchestrator, questionnaire_store, run_store,
+        evaluation_store, ground_truth_run
+    ):
+        """Verify orchestrator is called for each question and answers are saved."""
+        # Given
+        from scripts.run_experiments import ExperimentRunner
+        
+        runner = ExperimentRunner(
+            orchestrator=mock_orchestrator,
+            questionnaire_store=questionnaire_store,
+            run_store=run_store,
+            evaluation_store=evaluation_store
+        )
+        
+        mock_orchestrator.answer.side_effect = [
+            GeneratedAnswer(
+                answer="Answer 1",
+                citations=[GenCitation(
+                    key=ChunkKey(document_id="doc1", chunk_id="c1", revision=1),
+                    content_snippet="snippet 1"
+                )]
+            ),
+            GeneratedAnswer(
+                answer="Answer 2",
+                citations=[]
+            ),
+            GeneratedAnswer(
+                answer="Answer 3",
+                citations=[]
+            )
+        ]
+        
+        config = RunConfig(
+            id="exp-config-1",
+            name="Test Config 1",
+            llm_model="llama3.2",
+            llm_temperature=0.5,
+            retrieval_top_k=5,
+            similarity_threshold=0.1,
+            chunk_size=800,
+            chunk_overlap=100,
+            embedding_model="mxbai-embed-large",
+            embedding_dimensions=1024,
+        )
+        
+        # When
+        result = runner.run_experiment(
+            questionnaire_id="exp-q",
+            ground_truth_run_id="gt-run",
+            config=config
+        )
+        
+        # Then
+        assert mock_orchestrator.answer.call_count == 3
+        
+        # And
+        answers = run_store.get_answers_for_run(result["run_id"])
+        assert len(answers) == 3
+        
+        from src.domain.models import AnswerSuccess
+        assert all(isinstance(a, AnswerSuccess) for a in answers)
+        assert answers[0].answer_text == "Answer 1"
+        assert answers[1].answer_text == "Answer 2"
+        assert answers[2].answer_text == "Answer 3"
+    
     def test_happy_path_single_experiment(
         self, mock_orchestrator, questionnaire_store, run_store, 
         evaluation_store, ground_truth_run
