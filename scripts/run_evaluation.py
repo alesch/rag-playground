@@ -15,7 +15,10 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from langchain_ollama import OllamaLLM
-from src.config import OLLAMA_BASE_URL, OLLAMA_CHAT_MODEL, SQLITE_DB_PATH, OLLAMA_EMBEDDING_MODEL
+from src.config import (
+    OLLAMA_BASE_URL, OLLAMA_CHAT_MODEL, SQLITE_DB_PATH, OLLAMA_EMBEDDING_MODEL,
+    LLM_TEMPERATURE, RETRIEVAL_TOP_K, SIMILARITY_THRESHOLD
+)
 from src.utils.cli import print_banner, setup_orchestrator
 from src.database.sqlite_client import SQLiteClient
 from src.domain.models import Run, RunConfig
@@ -31,10 +34,10 @@ def main():
     parser = argparse.ArgumentParser(description="Automated evaluation runner.")
     parser.add_argument("--model", type=str, default=OLLAMA_CHAT_MODEL, help=f"Ollama model to use (default: {OLLAMA_CHAT_MODEL})")
     parser.add_argument("--name", type=str, help="Optional name for the run")
-    parser.add_argument("--top-k", type=int, default=5, help="Number of chunks to retrieve (default: 5)")
+    parser.add_argument("--top-k", type=int, default=RETRIEVAL_TOP_K, help=f"Number of chunks to retrieve (default: {RETRIEVAL_TOP_K})")
     parser.add_argument("--questionnaire", type=str, default="sample_questionnaire", help="Questionnaire ID to evaluate (default: sample_questionnaire)")
-    parser.add_argument("--temp", type=float, default=0.8, help="LLM temperature (default: 0.8)")
-    parser.add_argument("--threshold", type=float, default=0.0, help="Similarity threshold (default: 0.0)")
+    parser.add_argument("--temp", type=float, default=LLM_TEMPERATURE, help=f"LLM temperature (default: {LLM_TEMPERATURE}, optimized for llama3.2)")
+    parser.add_argument("--threshold", type=float, default=SIMILARITY_THRESHOLD, help=f"Similarity threshold (default: {SIMILARITY_THRESHOLD}, optimized for llama3.2)")
     args = parser.parse_args()
 
     # 1. Setup Dependencies
