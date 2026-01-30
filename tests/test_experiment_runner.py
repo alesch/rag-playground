@@ -17,8 +17,11 @@ def db_client():
 
 
 @pytest.fixture
-def mock_orchestrator():
-    return MagicMock()
+def mock_llm():
+    """Mock LLM that returns predictable responses."""
+    mock = MagicMock()
+    mock.invoke.return_value = "Answer from mock LLM"
+    return mock
 
 
 @pytest.fixture
@@ -90,23 +93,19 @@ class TestExperimentRunner:
     """Test suite for ExperimentRunner."""
     
     def test_evaluation_performed_and_metrics_returned(
-        self, mock_orchestrator, questionnaire_store, run_store,
-        evaluation_store, ground_truth_run, mock_embeddings
+        self, db_client, questionnaire_store, run_store,
+        evaluation_store, ground_truth_run, mock_embeddings, mock_llm, monkeypatch
     ):
         """Verify evaluation is performed and mean_answer_relevancy is returned."""
         # Given
+        monkeypatch.setattr("scripts.run_experiments.OllamaLLM", lambda **kwargs: mock_llm)
+        
         runner = ExperimentRunner(
-            orchestrator=mock_orchestrator,
+            db_client=db_client,
             questionnaire_store=questionnaire_store,
             run_store=run_store,
             evaluation_store=evaluation_store
         )
-        
-        mock_orchestrator.answer.side_effect = [
-            GeneratedAnswer(answer="Answer 1", citations=[]),
-            GeneratedAnswer(answer="Answer 2", citations=[]),
-            GeneratedAnswer(answer="Answer 3", citations=[])
-        ]
         
         config = RunConfig(
             id="exp-config-eval",
@@ -133,36 +132,31 @@ class TestExperimentRunner:
         assert isinstance(result["mean_answer_relevancy"], float)
         assert 0.0 <= result["mean_answer_relevancy"] <= 1.0
     
-    def test_orchestrator_called_and_answers_saved(
-        self, mock_orchestrator, questionnaire_store, run_store,
-        evaluation_store, ground_truth_run, mock_embeddings
+    def test_rag_system_called_and_answers_saved(
+        self, db_client, questionnaire_store, run_store,
+        evaluation_store, ground_truth_run, mock_embeddings, mock_llm, monkeypatch
     ):
-        """Verify orchestrator is called for each question and answers are saved."""
+        """Verify RAG system is called for each question and answers are saved."""
         # Given
+        # Add a chunk to database so retrieval returns results
+        from src.database.supabase_client import ChunkRecord, ChunkKey
+        from src.ingestion.embedder import Embedding
+        db_client.insert_chunk(ChunkRecord(
+            key=ChunkKey("test-doc", "chunk1", 1),
+            status="active",
+            content="Test content for retrieval",
+            embedding=Embedding(vector=[0.1] * 1024),
+            metadata=None
+        ))
+        
+        monkeypatch.setattr("scripts.run_experiments.OllamaLLM", lambda **kwargs: mock_llm)
+        
         runner = ExperimentRunner(
-            orchestrator=mock_orchestrator,
+            db_client=db_client,
             questionnaire_store=questionnaire_store,
             run_store=run_store,
             evaluation_store=evaluation_store
         )
-        
-        mock_orchestrator.answer.side_effect = [
-            GeneratedAnswer(
-                answer="Answer 1",
-                citations=[GenCitation(
-                    key=ChunkKey(document_id="doc1", chunk_id="c1", revision=1),
-                    content_snippet="snippet 1"
-                )]
-            ),
-            GeneratedAnswer(
-                answer="Answer 2",
-                citations=[]
-            ),
-            GeneratedAnswer(
-                answer="Answer 3",
-                citations=[]
-            )
-        ]
         
         config = RunConfig(
             id="exp-config-1",
@@ -185,7 +179,7 @@ class TestExperimentRunner:
         )
         
         # Then
-        assert mock_orchestrator.answer.call_count == 3
+        assert mock_llm.invoke.call_count == 3
         
         # And
         answers = run_store.get_answers_for_run(result["run_id"])
@@ -193,40 +187,22 @@ class TestExperimentRunner:
         
         from src.domain.models import AnswerSuccess
         assert all(isinstance(a, AnswerSuccess) for a in answers)
-        assert answers[0].answer_text == "Answer 1"
-        assert answers[1].answer_text == "Answer 2"
-        assert answers[2].answer_text == "Answer 3"
+        assert all(a.answer_text == "Answer from mock LLM" for a in answers)
     
     def test_happy_path_single_experiment(
-        self, mock_orchestrator, questionnaire_store, run_store, 
-        evaluation_store, ground_truth_run, mock_embeddings
+        self, db_client, questionnaire_store, run_store, 
+        evaluation_store, ground_truth_run, mock_embeddings, mock_llm, monkeypatch
     ):
         """Run single experiment with 3 questions and verify results."""
         # Given
+        monkeypatch.setattr("scripts.run_experiments.OllamaLLM", lambda **kwargs: mock_llm)
+        
         runner = ExperimentRunner(
-            orchestrator=mock_orchestrator,
+            db_client=db_client,
             questionnaire_store=questionnaire_store,
             run_store=run_store,
             evaluation_store=evaluation_store
         )
-        
-        mock_orchestrator.answer.side_effect = [
-            GeneratedAnswer(
-                answer="Answer 1",
-                citations=[GenCitation(
-                    key=ChunkKey(document_id="doc1", chunk_id="c1", revision=1),
-                    content_snippet="snippet"
-                )]
-            ),
-            GeneratedAnswer(
-                answer="Answer 2",
-                citations=[]
-            ),
-            GeneratedAnswer(
-                answer="Answer 3",
-                citations=[]
-            )
-        ]
         
         config = RunConfig(
             id="exp-config-1",
