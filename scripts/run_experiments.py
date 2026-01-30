@@ -13,6 +13,11 @@ from src.generation.rag_system import RAGSystem
 MAX_RETRIES = 3
 
 
+def _timestamp() -> str:
+    """Return current time formatted as HH:MM:SS."""
+    return datetime.now().strftime("%H:%M:%S")
+
+
 class ExperimentRunner:
     """Orchestrates multiple experiment trials."""
     
@@ -72,21 +77,27 @@ class ExperimentRunner:
         self.run_store.save_run(run)
         
         questions = self.questionnaire_store.get_questions(questionnaire_id)
+        total_questions = len(questions)
         
-        for question in questions:
+        for idx, question in enumerate(questions, 1):
+            print(f"{_timestamp()}   Question {idx}/{total_questions}", end="", flush=True)
+            
             # Retry up to MAX_RETRIES times on failure
             for attempt in range(MAX_RETRIES):
                 try:
                     generated_answer = rag_system.answer(question)  # Pass full Question object
                     answer = AnswerSuccess.from_GeneratedAnswer(run.id, question, generated_answer)
                     answer.save_on(self.run_store)
+                    print(" ✓")
                     break  # Success, move to next question
                 except Exception as e:
                     if attempt < MAX_RETRIES - 1:
                         # Not the last attempt, retry
+                        print(f" (retry {attempt + 1})", end="", flush=True)
                         continue
                     else:
                         # Last attempt failed, save as failure
+                        print(" ✗")
                         answer = AnswerFailure.from_exception(run.id, question, e)
                         answer.save_on(self.run_store)
         
@@ -115,10 +126,15 @@ class ExperimentRunner:
             Dictionary keyed by config ID, each containing list of trial results
         """
         results = {}
+        total_experiments = len(configs) * trials_per_config
+        current_experiment = 0
         
         for config in configs:
             trials = []
             for trial_num in range(trials_per_config):
+                current_experiment += 1
+                print(f"\n{_timestamp()} [{current_experiment}/{total_experiments}] Running: {config.name} - Trial {trial_num + 1}")
+                
                 # Create unique config ID for each trial
                 trial_config = RunConfig(
                     id=f"{config.id}-trial{trial_num + 1}",
@@ -140,6 +156,8 @@ class ExperimentRunner:
                     config=trial_config
                 )
                 trials.append(trial_result)
+                
+                print(f"{_timestamp()}   ✓ {config.name} - Trial {trial_num + 1} Completed - Mean Relevancy: {trial_result['mean_answer_relevancy']:.4f}")
             
             results[config.id] = {"trials": trials}
         
