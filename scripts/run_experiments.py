@@ -1,6 +1,8 @@
 """Experiment runner for performance tuning trials."""
 
 from src.domain.models import Run, AnswerSuccess
+from src.evaluation.evaluator import RAGEvaluator
+from src.ingestion.embedder import generate_embedding
 
 
 class ExperimentRunner:
@@ -24,8 +26,14 @@ class ExperimentRunner:
             answer = AnswerSuccess.from_GeneratedAnswer(run.id, question, generated_answer)
             answer.save_on(self.run_store)
         
+        evaluator = RAGEvaluator(run_store=self.run_store, embedder=generate_embedding)
+        report = evaluator.evaluate_run(run.id, ground_truth_run_id)
+        
+        self.evaluation_store.save_report(report)
+        
         return {
             "run_id": run.id,
             "questions_answered": len(questions),
+            "mean_answer_relevancy": report.overall_metrics.get("mean_answer_relevancy", 0.0),
             "success": True
         }

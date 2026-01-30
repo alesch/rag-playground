@@ -8,6 +8,7 @@ from src.domain.run_store import RunStore
 from src.database.sqlite_client import SQLiteClient
 from src.generation.generator import GeneratedAnswer, Citation as GenCitation
 from src.evaluation.evaluation_store import EvaluationStore
+from scripts.run_experiments import ExperimentRunner
 
 
 @pytest.fixture
@@ -88,14 +89,56 @@ def ground_truth_run(run_store, questionnaire_store):
 class TestExperimentRunner:
     """Test suite for ExperimentRunner."""
     
+    def test_evaluation_performed_and_metrics_returned(
+        self, mock_orchestrator, questionnaire_store, run_store,
+        evaluation_store, ground_truth_run, mock_embeddings
+    ):
+        """Verify evaluation is performed and mean_answer_relevancy is returned."""
+        # Given
+        runner = ExperimentRunner(
+            orchestrator=mock_orchestrator,
+            questionnaire_store=questionnaire_store,
+            run_store=run_store,
+            evaluation_store=evaluation_store
+        )
+        
+        mock_orchestrator.answer.side_effect = [
+            GeneratedAnswer(answer="Answer 1", citations=[]),
+            GeneratedAnswer(answer="Answer 2", citations=[]),
+            GeneratedAnswer(answer="Answer 3", citations=[])
+        ]
+        
+        config = RunConfig(
+            id="exp-config-eval",
+            name="Eval Test Config",
+            llm_model="llama3.2",
+            llm_temperature=0.5,
+            retrieval_top_k=5,
+            similarity_threshold=0.0,
+            chunk_size=800,
+            chunk_overlap=100,
+            embedding_model="mxbai-embed-large",
+            embedding_dimensions=1024,
+        )
+        
+        # When
+        result = runner.run_experiment(
+            questionnaire_id="exp-q",
+            ground_truth_run_id="gt-run",
+            config=config
+        )
+        
+        # Then
+        assert "mean_answer_relevancy" in result
+        assert isinstance(result["mean_answer_relevancy"], float)
+        assert 0.0 <= result["mean_answer_relevancy"] <= 1.0
+    
     def test_orchestrator_called_and_answers_saved(
         self, mock_orchestrator, questionnaire_store, run_store,
-        evaluation_store, ground_truth_run
+        evaluation_store, ground_truth_run, mock_embeddings
     ):
         """Verify orchestrator is called for each question and answers are saved."""
         # Given
-        from scripts.run_experiments import ExperimentRunner
-        
         runner = ExperimentRunner(
             orchestrator=mock_orchestrator,
             questionnaire_store=questionnaire_store,
@@ -156,12 +199,10 @@ class TestExperimentRunner:
     
     def test_happy_path_single_experiment(
         self, mock_orchestrator, questionnaire_store, run_store, 
-        evaluation_store, ground_truth_run
+        evaluation_store, ground_truth_run, mock_embeddings
     ):
         """Run single experiment with 3 questions and verify results."""
         # Given
-        from scripts.run_experiments import ExperimentRunner
-        
         runner = ExperimentRunner(
             orchestrator=mock_orchestrator,
             questionnaire_store=questionnaire_store,
