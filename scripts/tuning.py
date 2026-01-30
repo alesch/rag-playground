@@ -117,7 +117,7 @@ def setup_stores():
 
 def list_questionnaires(questionnaire_store):
     """List all available questionnaires."""
-    questionnaires = questionnaire_store.get_all_questionnaires()
+    questionnaires = questionnaire_store.list_questionnaires()
     print("Available questionnaires:")
     for q in questionnaires:
         num_questions = len(questionnaire_store.get_questions(q.id))
