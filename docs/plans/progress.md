@@ -76,8 +76,9 @@
 
 ### Component 3: Performance Tuning 🚧
 
-**Status**: In Progress - Building testable experiment runner
+**Status**: In Progress - ExperimentRunner ready, architecture refactored
 
+**Experiments Phase:**
 - [x] Create short test questionnaire (3 questions for rapid iteration)
 - [x] Establish baseline metrics (Mean Relevancy: 0.8085)
 - [x] Run 13 systematic experiments on retrieval and LLM parameters
@@ -87,11 +88,29 @@
 - [x] Create validation scripts (TDD tested)
 - [x] Validate on full 50-question: baseline BEATS optimized (-1.47%)
 - [x] Plan revised experiment strategy (7 configs × 3 trials)
-- [x] ExperimentRunner: Test 3/6 passing (evaluation + metrics)
-- [ ] Complete ExperimentRunner TDD (3 tests remaining: error handling, retries, multiple trials)
+
+**Architecture Refactoring:**
+- [x] Rename Generator → RAGSystem (better reflects purpose)
+- [x] Add configuration parameters to RAGSystem (temperature, top_k, threshold)
+- [x] ExperimentRunner uses RAGSystem directly (not Orchestrator)
+- [x] RunConfig parameters now applied to RAG system
+- [x] Mark Orchestrator for future LangGraph work
+- [x] Create code reorganization plan (deferred until after experiments)
+
+**ExperimentRunner TDD (3/6 tests passing):**
+- [x] Test 1: Happy path - returns run_id, questions_answered, success
+- [x] Test 2: Orchestrator called and answers saved to DB
+- [x] Test 3: Evaluation performed and metrics returned
+- [ ] Test 4: Error handling with retries (3 attempts per question)
+- [ ] Test 5: Multiple experiments, handle partial failures
+- [ ] Test 6: Multiple trials per config
+
+**Next Steps:**
+- [ ] Complete ExperimentRunner TDD (3 tests remaining)
 - [ ] Run overnight experiment suite (21 experiments, ~8 hours)
 - [ ] Analyze results and update config with validated parameters
 - [ ] Document final validated findings
+- [ ] Code reorganization (minimal: group rag/, move stores/)
 
 ---
 
