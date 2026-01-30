@@ -6,7 +6,7 @@ from src.domain.models import Questionnaire, Question, Run, RunConfig, ChunkKey
 from src.domain.questionnaire_store import QuestionnaireStore
 from src.domain.run_store import RunStore
 from src.database.sqlite_client import SQLiteClient
-from src.generation.generator import GeneratedAnswer, Citation as GenCitation
+from src.generation.rag_system import GeneratedAnswer, Citation as GenCitation
 from src.evaluation.evaluation_store import EvaluationStore
 from scripts.run_experiments import ExperimentRunner
 

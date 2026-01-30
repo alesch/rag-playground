@@ -2,7 +2,7 @@
 
 import pytest
 from src.orchestration.orchestrator import Orchestrator
-from src.generation.generator import GeneratedAnswer
+from src.generation.rag_system import GeneratedAnswer
 from src.database.supabase_client import ChunkKey, ChunkRecord
 from src.ingestion.embedder import Embedding
 

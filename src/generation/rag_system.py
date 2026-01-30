@@ -1,5 +1,5 @@
 """
-Generator module for answer generation.
+RAGSystem module for answer generation.
 
 Uses retrieved chunks and LLM to generate answers with citations.
 """
@@ -18,36 +18,41 @@ class GeneratedAnswer:
     citations: List[Citation]
 
 
-class Generator:
-    """Generates answers using RAG (Retrieval-Augmented Generation)."""
-
+class RAGSystem:
+    """RAG system encapsulating vector DB, embeddings, and LLM."""
+    
     def __init__(
         self,
         client: Optional[VectorDatabaseClient] = None,
-        llm=None
+        llm=None,
+        top_k: int = 5,
+        similarity_threshold: float = 0.0
     ):
         """
-        Initialize the generator.
-
+        Initialize the RAG system.
+        
         Args:
             client: VectorDatabaseClient for database access
             llm: LLM instance for answer generation
+            top_k: Number of chunks to retrieve
+            similarity_threshold: Minimum similarity score for retrieval
         """
         self.retriever = Retriever(client=client)
         self.llm = llm
+        self.top_k = top_k
+        self.similarity_threshold = similarity_threshold
 
-    def generate(self, query: str, top_k: int = 5) -> GeneratedAnswer:
+    def answer(self, query: str) -> GeneratedAnswer:
         """
         Generate an answer for the query using RAG.
-
+        
         Args:
             query: The question to answer
-            top_k: Number of chunks to retrieve
-
+            
         Returns:
             GeneratedAnswer with answer text and citations
         """
-        results = self.retriever.search(query, top_k=top_k)
+        results = self.retriever.search(query, top_k=self.top_k, threshold=self.similarity_threshold)
 
         if not results:
             return GeneratedAnswer(

@@ -1,16 +1,16 @@
 """
-Tests for the Generator module.
+Tests for the RAGSystem module.
 
 Tests answer generation using retrieved chunks and LLM.
 """
 
 import pytest
-from src.generation.generator import Generator, GeneratedAnswer
+from src.generation.rag_system import RAGSystem, GeneratedAnswer
 from src.database.supabase_client import ChunkKey, ChunkRecord, SearchResult
 from src.ingestion.embedder import Embedding
 
 
-class TestGenerator:
+class TestRAGSystem:
     """Tests for answer generation."""
 
     def test_generate_answer_from_retrieved_chunks(
@@ -26,10 +26,10 @@ class TestGenerator:
             metadata=None
         )
         vector_db.insert_chunk(chunk)
-        generator = Generator(client=vector_db, llm=mock_llm)
+        rag = RAGSystem(client=vector_db, llm=mock_llm)
 
         # When: Generate answer
-        result = generator.generate("What is MFA?")
+        result = rag.answer("What is MFA?")
 
         # Then: Returns GeneratedAnswer with answer text
         assert isinstance(result, GeneratedAnswer)
@@ -48,10 +48,10 @@ class TestGenerator:
             metadata=None
         )
         vector_db.insert_chunk(chunk)
-        generator = Generator(client=vector_db, llm=mock_llm)
+        rag = RAGSystem(client=vector_db, llm=mock_llm)
 
         # When: Generate answer
-        result = generator.generate("What is MFA?")
+        result = rag.answer("What is MFA?")
 
         # Then: Citations reference the source chunk
         assert len(result.citations) == 1
@@ -65,10 +65,10 @@ class TestGenerator:
     ):
         """Test that generator handles empty retrieval results gracefully."""
         # Given: No chunks in database
-        generator = Generator(client=vector_db, llm=mock_llm)
+        rag = RAGSystem(client=vector_db, llm=mock_llm)
 
         # When: Generate answer
-        result = generator.generate("What is MFA?")
+        result = rag.answer("What is MFA?")
 
         # Then: Returns answer with empty citations
         assert isinstance(result, GeneratedAnswer)
@@ -97,10 +97,10 @@ class TestGenerator:
         ]
         for chunk in chunks:
             vector_db.insert_chunk(chunk)
-        generator = Generator(client=vector_db, llm=mock_llm)
+        rag = RAGSystem(client=vector_db, llm=mock_llm)
 
         # When: Generate answer
-        generator.generate("What is authentication?")
+        rag.answer("What is authentication?")
 
         # Then: Prompt includes all chunk content
         assert "MFA requires two factors" in mock_llm.last_prompt

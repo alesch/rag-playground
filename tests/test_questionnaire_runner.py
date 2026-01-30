@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 from src.domain.questionnaire_runner import QuestionnaireRunner
 from src.domain.models import Questionnaire, Question, Run, RunConfig, ChunkKey, AnswerSuccess, AnswerFailure
-from src.generation.generator import GeneratedAnswer, Citation as GenCitation
+from src.generation.rag_system import GeneratedAnswer, Citation as GenCitation
 from src.domain.questionnaire_store import QuestionnaireStore
 from src.domain.run_store import RunStore
 from src.database.sqlite_client import SQLiteClient
