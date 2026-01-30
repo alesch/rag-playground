@@ -189,6 +189,66 @@ class TestExperimentRunner:
         assert all(isinstance(a, AnswerSuccess) for a in answers)
         assert all(a.answer_text == "Answer from mock LLM" for a in answers)
     
+    def test_retry_on_llm_failure(
+        self, db_client, questionnaire_store, run_store,
+        evaluation_store, ground_truth_run, mock_embeddings, mock_llm, monkeypatch
+    ):
+        """Verify retry logic - fails 2 times then succeeds on 3rd attempt."""
+        # Given
+        # Add chunk so retrieval succeeds
+        from src.database.sqlite_client import ChunkRecord, ChunkKey
+        from src.ingestion.embedder import Embedding
+        db_client.insert_chunk(ChunkRecord(
+            key=ChunkKey("test-doc", "chunk1", 1),
+            status="active",
+            content="Test content",
+            embedding=Embedding(vector=[0.1] * 1024),
+            metadata=None
+        ))
+        
+        # Mock LLM to fail twice, then succeed
+        mock_llm.invoke.side_effect = [
+            RuntimeError("LLM timeout"),  # Q1 attempt 1
+            RuntimeError("LLM timeout"),  # Q1 attempt 2
+            "Answer 1",  # Q1 attempt 3 - success
+            "Answer 2",  # Q2 attempt 1 - success
+            "Answer 3",  # Q3 attempt 1 - success
+        ]
+        
+        monkeypatch.setattr("scripts.run_experiments.OllamaLLM", lambda **kwargs: mock_llm)
+        
+        runner = ExperimentRunner(
+            db_client=db_client,
+            questionnaire_store=questionnaire_store,
+            run_store=run_store,
+            evaluation_store=evaluation_store
+        )
+        
+        config = RunConfig(
+            id="exp-config-retry",
+            name="Retry Test Config",
+            llm_model="llama3.2",
+            llm_temperature=0.5,
+            retrieval_top_k=5,
+            similarity_threshold=0.0,
+            chunk_size=800,
+            chunk_overlap=100,
+            embedding_model="mxbai-embed-large",
+            embedding_dimensions=1024,
+        )
+        
+        # When
+        result = runner.run_experiment(
+            questionnaire_id="exp-q",
+            ground_truth_run_id="gt-run",
+            config=config
+        )
+        
+        # Then
+        assert mock_llm.invoke.call_count == 5  # 3 for Q1, 1 for Q2, 1 for Q3
+        assert result["questions_answered"] == 3
+        assert result["success"] is True
+    
     def test_happy_path_single_experiment(
         self, db_client, questionnaire_store, run_store, 
         evaluation_store, ground_truth_run, mock_embeddings, mock_llm, monkeypatch

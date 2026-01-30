@@ -2,10 +2,13 @@
 
 from langchain_ollama import OllamaLLM
 from src.config import OLLAMA_BASE_URL
-from src.domain.models import Run, AnswerSuccess
+from src.domain.models import Run, AnswerSuccess, AnswerFailure
 from src.evaluation.evaluator import RAGEvaluator
 from src.ingestion.embedder import generate_embedding
 from src.generation.rag_system import RAGSystem
+
+# Retry configuration
+MAX_RETRIES = 3
 
 
 class ExperimentRunner:
@@ -43,9 +46,21 @@ class ExperimentRunner:
         questions = self.questionnaire_store.get_questions(questionnaire_id)
         
         for question in questions:
-            generated_answer = rag_system.answer(question.text)
-            answer = AnswerSuccess.from_GeneratedAnswer(run.id, question, generated_answer)
-            answer.save_on(self.run_store)
+            # Retry up to MAX_RETRIES times on failure
+            for attempt in range(MAX_RETRIES):
+                try:
+                    generated_answer = rag_system.answer(question.text)
+                    answer = AnswerSuccess.from_GeneratedAnswer(run.id, question, generated_answer)
+                    answer.save_on(self.run_store)
+                    break  # Success, move to next question
+                except Exception as e:
+                    if attempt < MAX_RETRIES - 1:
+                        # Not the last attempt, retry
+                        continue
+                    else:
+                        # Last attempt failed, save as failure
+                        answer = AnswerFailure.from_exception(run.id, question, e)
+                        answer.save_on(self.run_store)
         
         evaluator = RAGEvaluator(run_store=self.run_store, embedder=generate_embedding)
         report = evaluator.evaluate_run(run.id, ground_truth_run_id)

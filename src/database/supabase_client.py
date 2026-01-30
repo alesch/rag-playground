@@ -1,6 +1,9 @@
 """
 Supabase client for database operations.
 
+DEPRECATED: Use SQLiteClient instead. Supabase support is maintained for legacy
+compatibility but SQLite is the primary database for development and production.
+
 Handles connection to Supabase and operations on document_chunks table.
 """
 
