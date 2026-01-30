@@ -74,9 +74,9 @@
 - [ ] Integrate LangGraph state management (if needed)
 - [ ] Implement conditional routing (e.g., "Not Found" -> Retry/Web Search)
 
-### Component 3: Performance Tuning ✅
+### Component 3: Performance Tuning 🚧
 
-**Status**: Completed (llama3.2 optimized)
+**Status**: In Progress - Building testable experiment runner
 
 - [x] Create short test questionnaire (3 questions for rapid iteration)
 - [x] Establish baseline metrics (Mean Relevancy: 0.8085)
@@ -85,10 +85,13 @@
 - [x] Achieve +10.7% quality improvement + 28% speed improvement
 - [x] Update config.py with optimized defaults for llama3.2
 - [x] Create validation scripts (TDD tested)
-- [x] Document findings in performance_tuning_final_results.md
-- [ ] Validate on full 50-question questionnaire (scripts ready)
-- [ ] Optimize chunk sizes and overlap (deferred - good enough)
-- [ ] Refine LLM prompts (future work)
+- [x] Validate on full 50-question: baseline BEATS optimized (-1.47%)
+- [x] Plan revised experiment strategy (7 configs × 3 trials)
+- [x] ExperimentRunner: Test 1/6 passing (happy path structure)
+- [ ] Complete ExperimentRunner TDD (5 tests remaining)
+- [ ] Run overnight experiment suite (21 experiments, ~8 hours)
+- [ ] Analyze results and update config with validated parameters
+- [ ] Document final validated findings
 
 ---
 
