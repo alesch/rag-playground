@@ -25,6 +25,18 @@ def mock_llm():
 
 
 @pytest.fixture
+def mock_rag_system(db_client, mock_llm):
+    """Create a RAGSystem with mock LLM for testing."""
+    from src.generation.rag_system import RAGSystem
+    return RAGSystem(
+        client=db_client,
+        llm=mock_llm,
+        top_k=5,
+        similarity_threshold=0.0
+    )
+
+
+@pytest.fixture
 def questionnaire_store(db_client):
     store = QuestionnaireStore(db_client=db_client)
     q = Questionnaire(id="exp-q", name="Experiment Questionnaire")
@@ -94,17 +106,16 @@ class TestExperimentRunner:
     
     def test_evaluation_performed_and_metrics_returned(
         self, db_client, questionnaire_store, run_store,
-        evaluation_store, ground_truth_run, mock_embeddings, mock_llm, monkeypatch
+        evaluation_store, ground_truth_run, mock_embeddings, mock_rag_system
     ):
         """Verify evaluation is performed and mean_answer_relevancy is returned."""
         # Given
-        monkeypatch.setattr("scripts.run_experiments.OllamaLLM", lambda **kwargs: mock_llm)
-        
         runner = ExperimentRunner(
             db_client=db_client,
             questionnaire_store=questionnaire_store,
             run_store=run_store,
-            evaluation_store=evaluation_store
+            evaluation_store=evaluation_store,
+            rag_system=mock_rag_system
         )
         
         config = RunConfig(
@@ -134,7 +145,7 @@ class TestExperimentRunner:
     
     def test_rag_system_called_and_answers_saved(
         self, db_client, questionnaire_store, run_store,
-        evaluation_store, ground_truth_run, mock_embeddings, mock_llm, monkeypatch
+        evaluation_store, ground_truth_run, mock_embeddings, mock_llm, mock_rag_system
     ):
         """Verify RAG system is called for each question and answers are saved."""
         # Given
@@ -149,13 +160,12 @@ class TestExperimentRunner:
             metadata=None
         ))
         
-        monkeypatch.setattr("scripts.run_experiments.OllamaLLM", lambda **kwargs: mock_llm)
-        
         runner = ExperimentRunner(
             db_client=db_client,
             questionnaire_store=questionnaire_store,
             run_store=run_store,
-            evaluation_store=evaluation_store
+            evaluation_store=evaluation_store,
+            rag_system=mock_rag_system
         )
         
         config = RunConfig(
@@ -191,7 +201,7 @@ class TestExperimentRunner:
     
     def test_retry_on_llm_failure(
         self, db_client, questionnaire_store, run_store,
-        evaluation_store, ground_truth_run, mock_embeddings, mock_llm, monkeypatch
+        evaluation_store, ground_truth_run, mock_embeddings, mock_llm
     ):
         """Verify retry logic - fails 2 times then succeeds on 3rd attempt."""
         # Given
@@ -215,13 +225,20 @@ class TestExperimentRunner:
             "Answer 3",  # Q3 attempt 1 - success
         ]
         
-        monkeypatch.setattr("scripts.run_experiments.OllamaLLM", lambda **kwargs: mock_llm)
+        from src.generation.rag_system import RAGSystem
+        rag_system = RAGSystem(
+            client=db_client,
+            llm=mock_llm,
+            top_k=5,
+            similarity_threshold=0.0
+        )
         
         runner = ExperimentRunner(
             db_client=db_client,
             questionnaire_store=questionnaire_store,
             run_store=run_store,
-            evaluation_store=evaluation_store
+            evaluation_store=evaluation_store,
+            rag_system=rag_system
         )
         
         config = RunConfig(
@@ -251,7 +268,7 @@ class TestExperimentRunner:
     
     def test_run_multiple_experiments(
         self, db_client, questionnaire_store, run_store,
-        evaluation_store, ground_truth_run, mock_embeddings, mock_llm, monkeypatch
+        evaluation_store, ground_truth_run, mock_embeddings, mock_rag_system
     ):
         """Run 2 configs × 2 trials = 4 experiments total."""
         # Given
@@ -266,13 +283,12 @@ class TestExperimentRunner:
             metadata=None
         ))
         
-        monkeypatch.setattr("scripts.run_experiments.OllamaLLM", lambda **kwargs: mock_llm)
-        
         runner = ExperimentRunner(
             db_client=db_client,
             questionnaire_store=questionnaire_store,
             run_store=run_store,
-            evaluation_store=evaluation_store
+            evaluation_store=evaluation_store,
+            rag_system=mock_rag_system
         )
         
         configs = [
@@ -327,17 +343,16 @@ class TestExperimentRunner:
     
     def test_happy_path_single_experiment(
         self, db_client, questionnaire_store, run_store, 
-        evaluation_store, ground_truth_run, mock_embeddings, mock_llm, monkeypatch
+        evaluation_store, ground_truth_run, mock_embeddings, mock_rag_system
     ):
         """Run single experiment with 3 questions and verify results."""
         # Given
-        monkeypatch.setattr("scripts.run_experiments.OllamaLLM", lambda **kwargs: mock_llm)
-        
         runner = ExperimentRunner(
             db_client=db_client,
             questionnaire_store=questionnaire_store,
             run_store=run_store,
-            evaluation_store=evaluation_store
+            evaluation_store=evaluation_store,
+            rag_system=mock_rag_system
         )
         
         config = RunConfig(

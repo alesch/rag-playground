@@ -1,5 +1,6 @@
 """Experiment runner for performance tuning trials."""
 
+from typing import Optional
 from langchain_ollama import OllamaLLM
 from src.config import OLLAMA_BASE_URL
 from src.domain.models import Run, RunConfig, AnswerSuccess, AnswerFailure
@@ -14,31 +15,55 @@ MAX_RETRIES = 3
 class ExperimentRunner:
     """Orchestrates multiple experiment trials."""
     
-    def __init__(self, db_client, questionnaire_store, run_store, evaluation_store):
+    def __init__(
+        self, 
+        db_client, 
+        questionnaire_store, 
+        run_store, 
+        evaluation_store,
+        rag_system: Optional[RAGSystem] = None
+    ):
+        """Initialize ExperimentRunner.
+        
+        Args:
+            db_client: Database client for storing results
+            questionnaire_store: Store for retrieving questionnaires
+            run_store: Store for saving runs and answers
+            evaluation_store: Store for saving evaluation reports
+            rag_system: Optional pre-configured RAGSystem for testing.
+                       If None, will create RAGSystem from config for each experiment.
+        """
         self.db_client = db_client
         self.questionnaire_store = questionnaire_store
         self.run_store = run_store
         self.evaluation_store = evaluation_store
+        self._test_rag_system = rag_system  # Only used for testing
     
-    def run_experiment(self, questionnaire_id, ground_truth_run_id, config):
-        """Run single experiment with specific configuration.
+    def _create_rag_system(self, config: RunConfig) -> RAGSystem:
+        """Create RAGSystem from config, or return test instance if provided."""
+        if self._test_rag_system:
+            return self._test_rag_system
         
-        Creates a RAGSystem configured with parameters from RunConfig.
-        """
-        # Create LLM with temperature from config
         llm = OllamaLLM(
             base_url=OLLAMA_BASE_URL,
             model=config.llm_model,
             temperature=config.llm_temperature
         )
         
-        # Create RAGSystem with retrieval parameters from config
-        rag_system = RAGSystem(
+        return RAGSystem(
             client=self.db_client,
             llm=llm,
             top_k=config.retrieval_top_k,
             similarity_threshold=config.similarity_threshold
         )
+    
+    def run_experiment(self, questionnaire_id, ground_truth_run_id, config):
+        """Run single experiment with specific configuration.
+        
+        Creates a RAGSystem configured with parameters from RunConfig.
+        """
+        # Create RAGSystem from config (or use test instance)
+        rag_system = self._create_rag_system(config)
         
         run = Run(id=f"run-{config.id}", config=config)
         self.run_store.save_run(run)

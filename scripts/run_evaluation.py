@@ -24,8 +24,8 @@ from src.database.sqlite_client import SQLiteClient
 from src.domain.models import Run, RunConfig
 from src.domain.questionnaire_store import QuestionnaireStore
 from src.domain.run_store import RunStore
-from src.domain.runner import QuestionnaireRunner
-from src.orchestration.orchestrator import Orchestrator
+from src.domain.questionnaire_runner import QuestionnaireRunner
+from src.generation.rag_system import RAGSystem
 from src.evaluation.evaluator import RAGEvaluator
 from src.evaluation.evaluation_store import EvaluationStore
 from src.ingestion.embedder import generate_embedding
@@ -46,9 +46,12 @@ def main():
     # Cast to SQLiteClient for specialized stores
     sqlite_client = cast(SQLiteClient, db_client)
     
+    # Create RAG system from orchestrator (bypass orchestrator wrapper)
+    rag_system = orchestrator.rag_system
+    
     q_store = QuestionnaireStore(sqlite_client)
     run_store = RunStore(sqlite_client)
-    runner = QuestionnaireRunner(orchestrator, q_store, run_store)
+    runner = QuestionnaireRunner(rag_system, q_store, run_store)
     
     run_id = f"eval-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
     questionnaire_id = args.questionnaire

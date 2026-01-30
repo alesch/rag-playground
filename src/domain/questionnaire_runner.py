@@ -3,7 +3,7 @@
 from src.domain.models import Run, Answer, AnswerSuccess, AnswerFailure, Citation, ChunkKey
 from src.domain.questionnaire_store import QuestionnaireStore
 from src.domain.run_store import RunStore
-from src.orchestration.orchestrator import Orchestrator
+from src.generation.rag_system import RAGSystem
 
 
 class QuestionnaireRunner:
@@ -11,11 +11,11 @@ class QuestionnaireRunner:
 
     def __init__(
         self,
-        orchestrator: Orchestrator,
+        rag_system: RAGSystem,
         questionnaire_store: QuestionnaireStore,
         run_store: RunStore,
     ):
-        self.orchestrator = orchestrator
+        self.rag_system = rag_system
         self.questionnaire_store = questionnaire_store
         self.run_store = run_store
 
@@ -32,8 +32,8 @@ class QuestionnaireRunner:
         for i, question in enumerate(questions, 1):
             print(f"[{i}/{total}] Processing question: {question.id}...")
             try:
-                # Generate answer
-                generated = self.orchestrator.answer(question.text)
+                # Generate answer using full Question object for section metadata
+                generated = self.rag_system.answer(question)
                 
                 # Create answer object using factory
                 answer = AnswerSuccess.from_GeneratedAnswer(

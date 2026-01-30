@@ -17,7 +17,7 @@ def db_client():
 
 
 @pytest.fixture
-def mock_orchestrator():
+def mock_rag_system():
     return MagicMock()
 
 
@@ -62,17 +62,17 @@ def run_config():
 class TestQuestionnaireRunner:
     """Test suite for QuestionnaireRunner."""
 
-    def test_run_full_questionnaire(self, mock_orchestrator, questionnaire_store, run_store, run_config):
+    def test_run_full_questionnaire(self, mock_rag_system, questionnaire_store, run_store, run_config):
         """Run a full questionnaire and verify answers are saved."""
         # Given
         runner = QuestionnaireRunner(
-            orchestrator=mock_orchestrator,
+            rag_system=mock_rag_system,
             questionnaire_store=questionnaire_store,
             run_store=run_store
         )
         
-        # Mock orchestrator response
-        mock_orchestrator.answer.side_effect = [
+        # Mock RAG system response
+        mock_rag_system.answer.side_effect = [
             GeneratedAnswer(
                 answer="We have a strong security policy.",
                 citations=[GenCitation(key=ChunkKey(document_id="doc1", chunk_id="c1", revision=1), content_snippet="Policy details...")],
@@ -105,17 +105,17 @@ class TestQuestionnaireRunner:
         # Verify run was also saved
         assert run_store.get_run(run_config.id) is not None
 
-    def test_handle_generation_error(self, mock_orchestrator, questionnaire_store, run_store, run_config):
+    def test_handle_generation_error(self, mock_rag_system, questionnaire_store, run_store, run_config):
         """Handle errors during generation by creating an AnswerFailure."""
         # Given
         runner = QuestionnaireRunner(
-            orchestrator=mock_orchestrator,
+            rag_system=mock_rag_system,
             questionnaire_store=questionnaire_store,
             run_store=run_store
         )
         
-        # Mock orchestrator to raise an error
-        mock_orchestrator.answer.side_effect = RuntimeError("LLM failure")
+        # Mock RAG system to raise an error
+        mock_rag_system.answer.side_effect = RuntimeError("LLM failure")
 
         # When
         runner.run_questionnaire(questionnaire_id="test-q", run=run_config)

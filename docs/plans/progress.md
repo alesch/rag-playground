@@ -96,18 +96,27 @@
 - [x] RunConfig parameters now applied to RAG system
 - [x] Mark Orchestrator for future LangGraph work
 - [x] Create code reorganization plan (deferred until after experiments)
+- [x] RAGSystem refactored to accept Question objects (uses section metadata)
+- [x] QuestionnaireRunner bypasses Orchestrator, uses RAGSystem directly
+- [x] All callers verified to use Question objects appropriately
 
-**ExperimentRunner TDD (5/6 tests passing - READY FOR EXPERIMENTS):**
+**ExperimentRunner TDD (5/5 tests passing - READY FOR EXPERIMENTS):**
 - [x] Test 1: Happy path - returns run_id, questions_answered, success
 - [x] Test 2: RAG system called and answers saved to DB
 - [x] Test 3: Evaluation performed and metrics returned
 - [x] Test 4: Retry logic - fails 2x then succeeds on 3rd attempt
 - [x] Test 5: Batch processing - 2 configs × 2 trials = 4 experiments
-- [ ] Test 6: (Skipped - covered by test 5)
+- [x] Refactored: Removed monkeypatching, use dependency injection with RAGSystem
+
+**Experiment Script Ready:**
+- [x] Created scripts/tuning.py (configurable for any questionnaire)
+- [x] Supports --questionnaire and --trials arguments
+- [x] Tests 7 configurations (baseline, 2 temp, 2 threshold, 2 top-k)
+- [x] Refactored for readability (extracted helper functions)
 
 **Next Steps:**
-- [ ] Complete ExperimentRunner TDD (3 tests remaining)
-- [ ] Run overnight experiment suite (21 experiments, ~8 hours)
+- [ ] Test with 3-question questionnaire (quick validation)
+- [ ] Run overnight experiment suite (7 configs × 3 trials = 21 experiments, ~8 hours)
 - [ ] Analyze results and update config with validated parameters
 - [ ] Document final validated findings
 - [ ] Code reorganization (minimal: group rag/, move stores/)
