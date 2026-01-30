@@ -5,9 +5,9 @@ Uses retrieved chunks and LLM to generate answers with citations.
 """
 
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Union
 from src.database.base import VectorDatabaseClient, SearchResult
-from src.domain.models import Citation
+from src.domain.models import Citation, Question
 from src.retrieval.retriever import Retriever
 
 
@@ -42,16 +42,26 @@ class RAGSystem:
         self.top_k = top_k
         self.similarity_threshold = similarity_threshold
 
-    def answer(self, query: str) -> GeneratedAnswer:
+    def answer(self, question: Union[Question, str]) -> GeneratedAnswer:
         """
-        Generate an answer for the query using RAG.
+        Generate an answer for the question using RAG.
         
         Args:
-            query: The question to answer
+            question: Question object (preferred) or query string (legacy)
             
         Returns:
             GeneratedAnswer with answer text and citations
         """
+        # Extract query text and optional section context
+        if isinstance(question, Question):
+            query = question.text
+            # Enhance query with section if available
+            if question.section:
+                query = f"{question.section}: {question.text}"
+        else:
+            # Legacy: accept plain string
+            query = question
+        
         results = self.retriever.search(query, top_k=self.top_k, threshold=self.similarity_threshold)
 
         if not results:

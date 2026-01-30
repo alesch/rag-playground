@@ -49,7 +49,7 @@ class ExperimentRunner:
             # Retry up to MAX_RETRIES times on failure
             for attempt in range(MAX_RETRIES):
                 try:
-                    generated_answer = rag_system.answer(question.text)
+                    generated_answer = rag_system.answer(question)  # Pass full Question object
                     answer = AnswerSuccess.from_GeneratedAnswer(run.id, question, generated_answer)
                     answer.save_on(self.run_store)
                     break  # Success, move to next question
