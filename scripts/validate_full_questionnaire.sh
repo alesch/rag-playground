@@ -30,7 +30,7 @@ source "$PROJECT_ROOT/venv/bin/activate"
 # Test 1: Baseline configuration (temp=0.8, threshold=0.0)
 log "[1/2] Running BASELINE on full questionnaire..."
 log "Config: temp=0.8, top_k=5, threshold=0.0"
-time python "$SCRIPT_DIR/run_evaluation.py" \
+time python -u "$SCRIPT_DIR/run_evaluation.py" \
     --questionnaire sample_questionnaire \
     --temp 0.8 \
     --threshold 0.0 \
@@ -43,7 +43,7 @@ log ""
 # Test 2: Optimized configuration (temp=0.3, threshold=0.3)
 log "[2/2] Running OPTIMIZED on full questionnaire..."
 log "Config: temp=0.3, top_k=5, threshold=0.3"
-time python "$SCRIPT_DIR/run_evaluation.py" \
+time python -u "$SCRIPT_DIR/run_evaluation.py" \
     --questionnaire sample_questionnaire \
     --temp 0.3 \
     --threshold 0.3 \

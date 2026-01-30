@@ -43,7 +43,7 @@ for i in $(seq 1 $NUM_TRIALS); do
     log ">>> Baseline Trial $i/$NUM_TRIALS <<<"
     log "Started at: $(date +'%H:%M:%S')"
     
-    time python "$SCRIPT_DIR/run_evaluation.py" \
+    time python -u "$SCRIPT_DIR/run_evaluation.py" \
         --questionnaire "$QUESTIONNAIRE" \
         --temp 0.8 \
         --threshold 0.0 \
@@ -72,7 +72,7 @@ for i in $(seq 1 $NUM_TRIALS); do
     log ">>> Optimized Trial $i/$NUM_TRIALS <<<"
     log "Started at: $(date +'%H:%M:%S')"
     
-    time python "$SCRIPT_DIR/run_evaluation.py" \
+    time python -u "$SCRIPT_DIR/run_evaluation.py" \
         --questionnaire "$QUESTIONNAIRE" \
         --temp 0.3 \
         --threshold 0.3 \
