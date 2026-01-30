@@ -88,18 +88,20 @@ def _process_document(document: Document, client: VectorDatabaseClient) -> int:
     return len(chunk_records)
 
 
-def ingest_document(document_path: Path) -> IngestionResult:
+def ingest_document(document_path: Path, client: VectorDatabaseClient = None) -> IngestionResult:
     """
     Ingest a single document through the full pipeline.
 
     Args:
         document_path: Path to the markdown document
+        client: Optional database client. If None, creates one from config.
 
     Returns:
         IngestionResult with document_id and chunks_stored count
     """
     document = load_document(document_path)
-    client = get_db_client()
+    if client is None:
+        client = get_db_client()
     chunks_stored = _process_document(document, client)
 
     return IngestionResult(
@@ -108,19 +110,21 @@ def ingest_document(document_path: Path) -> IngestionResult:
     )
 
 
-def ingest_corpus(corpus_path: Path) -> CorpusIngestionResult:
+def ingest_corpus(corpus_path: Path, client: VectorDatabaseClient = None) -> CorpusIngestionResult:
     """
     Ingest all documents from a corpus directory.
 
     Args:
         corpus_path: Path to the corpus directory
+        client: Optional database client. If None, creates one from config.
 
     Returns:
         CorpusIngestionResult with documents_processed, total_chunks_stored,
         and per-document results
     """
     documents = load_corpus_documents(corpus_path)
-    client = get_db_client()
+    if client is None:
+        client = get_db_client()
 
     document_results = []
     total_chunks_stored = 0
