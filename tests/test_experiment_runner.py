@@ -249,6 +249,82 @@ class TestExperimentRunner:
         assert result["questions_answered"] == 3
         assert result["success"] is True
     
+    def test_run_multiple_experiments(
+        self, db_client, questionnaire_store, run_store,
+        evaluation_store, ground_truth_run, mock_embeddings, mock_llm, monkeypatch
+    ):
+        """Run 2 configs × 2 trials = 4 experiments total."""
+        # Given
+        # Add chunk for retrieval
+        from src.database.sqlite_client import ChunkRecord, ChunkKey
+        from src.ingestion.embedder import Embedding
+        db_client.insert_chunk(ChunkRecord(
+            key=ChunkKey("test-doc", "chunk1", 1),
+            status="active",
+            content="Test content",
+            embedding=Embedding(vector=[0.1] * 1024),
+            metadata=None
+        ))
+        
+        monkeypatch.setattr("scripts.run_experiments.OllamaLLM", lambda **kwargs: mock_llm)
+        
+        runner = ExperimentRunner(
+            db_client=db_client,
+            questionnaire_store=questionnaire_store,
+            run_store=run_store,
+            evaluation_store=evaluation_store
+        )
+        
+        configs = [
+            RunConfig(
+                id="config-A",
+                name="Config A",
+                llm_model="llama3.2",
+                llm_temperature=0.5,
+                retrieval_top_k=5,
+                similarity_threshold=0.0,
+                chunk_size=800,
+                chunk_overlap=100,
+                embedding_model="mxbai-embed-large",
+                embedding_dimensions=1024,
+            ),
+            RunConfig(
+                id="config-B",
+                name="Config B",
+                llm_model="llama3.2",
+                llm_temperature=0.7,
+                retrieval_top_k=5,
+                similarity_threshold=0.0,
+                chunk_size=800,
+                chunk_overlap=100,
+                embedding_model="mxbai-embed-large",
+                embedding_dimensions=1024,
+            )
+        ]
+        
+        # When
+        results = runner.run_experiments(
+            questionnaire_id="exp-q",
+            ground_truth_run_id="gt-run",
+            configs=configs,
+            trials_per_config=2
+        )
+        
+        # Then
+        assert len(results) == 2  # 2 configs
+        assert "config-A" in results
+        assert "config-B" in results
+        
+        # And each config has 2 trials
+        assert len(results["config-A"]["trials"]) == 2
+        assert len(results["config-B"]["trials"]) == 2
+        
+        # And all trials succeeded
+        for config_id in ["config-A", "config-B"]:
+            for trial in results[config_id]["trials"]:
+                assert trial["success"] is True
+                assert trial["questions_answered"] == 3
+    
     def test_happy_path_single_experiment(
         self, db_client, questionnaire_store, run_store, 
         evaluation_store, ground_truth_run, mock_embeddings, mock_llm, monkeypatch

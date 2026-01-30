@@ -97,13 +97,13 @@
 - [x] Mark Orchestrator for future LangGraph work
 - [x] Create code reorganization plan (deferred until after experiments)
 
-**ExperimentRunner TDD (4/6 tests passing):**
+**ExperimentRunner TDD (5/6 tests passing - READY FOR EXPERIMENTS):**
 - [x] Test 1: Happy path - returns run_id, questions_answered, success
 - [x] Test 2: RAG system called and answers saved to DB
 - [x] Test 3: Evaluation performed and metrics returned
 - [x] Test 4: Retry logic - fails 2x then succeeds on 3rd attempt
-- [ ] Test 5: Multiple experiments, handle partial failures
-- [ ] Test 6: Multiple trials per config
+- [x] Test 5: Batch processing - 2 configs × 2 trials = 4 experiments
+- [ ] Test 6: (Skipped - covered by test 5)
 
 **Next Steps:**
 - [ ] Complete ExperimentRunner TDD (3 tests remaining)

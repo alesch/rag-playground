@@ -2,7 +2,7 @@
 
 from langchain_ollama import OllamaLLM
 from src.config import OLLAMA_BASE_URL
-from src.domain.models import Run, AnswerSuccess, AnswerFailure
+from src.domain.models import Run, RunConfig, AnswerSuccess, AnswerFailure
 from src.evaluation.evaluator import RAGEvaluator
 from src.ingestion.embedder import generate_embedding
 from src.generation.rag_system import RAGSystem
@@ -73,3 +73,46 @@ class ExperimentRunner:
             "mean_answer_relevancy": report.overall_metrics.get("mean_answer_relevancy", 0.0),
             "success": True
         }
+    
+    def run_experiments(self, questionnaire_id, ground_truth_run_id, configs, trials_per_config):
+        """Run multiple experiments with multiple trials per config.
+        
+        Args:
+            questionnaire_id: ID of questionnaire to run
+            ground_truth_run_id: ID of ground truth run for evaluation
+            configs: List of RunConfig objects
+            trials_per_config: Number of trials to run for each config
+            
+        Returns:
+            Dictionary keyed by config ID, each containing list of trial results
+        """
+        results = {}
+        
+        for config in configs:
+            trials = []
+            for trial_num in range(trials_per_config):
+                # Create unique config ID for each trial
+                trial_config = RunConfig(
+                    id=f"{config.id}-trial{trial_num + 1}",
+                    name=f"{config.name} - Trial {trial_num + 1}",
+                    llm_model=config.llm_model,
+                    llm_temperature=config.llm_temperature,
+                    retrieval_top_k=config.retrieval_top_k,
+                    similarity_threshold=config.similarity_threshold,
+                    chunk_size=config.chunk_size,
+                    chunk_overlap=config.chunk_overlap,
+                    embedding_model=config.embedding_model,
+                    embedding_dimensions=config.embedding_dimensions,
+                    description=config.description
+                )
+                
+                trial_result = self.run_experiment(
+                    questionnaire_id=questionnaire_id,
+                    ground_truth_run_id=ground_truth_run_id,
+                    config=trial_config
+                )
+                trials.append(trial_result)
+            
+            results[config.id] = {"trials": trials}
+        
+        return results
