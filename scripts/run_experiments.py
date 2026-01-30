@@ -1,6 +1,7 @@
 """Experiment runner for performance tuning trials."""
 
 from typing import Optional
+from datetime import datetime
 from langchain_ollama import OllamaLLM
 from src.config import OLLAMA_BASE_URL
 from src.domain.models import Run, RunConfig, AnswerSuccess, AnswerFailure
@@ -65,7 +66,9 @@ class ExperimentRunner:
         # Create RAGSystem from config (or use test instance)
         rag_system = self._create_rag_system(config)
         
-        run = Run(id=f"run-{config.id}", config=config)
+        # Generate unique run ID with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        run = Run(id=f"run-{config.id}-{timestamp}", config=config)
         self.run_store.save_run(run)
         
         questions = self.questionnaire_store.get_questions(questionnaire_id)
