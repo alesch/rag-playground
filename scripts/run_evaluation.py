@@ -19,7 +19,7 @@ from src.config import (
     OLLAMA_BASE_URL, OLLAMA_CHAT_MODEL, SQLITE_DB_PATH, OLLAMA_EMBEDDING_MODEL,
     LLM_TEMPERATURE, RETRIEVAL_TOP_K, SIMILARITY_THRESHOLD
 )
-from src.utils.cli import print_banner, setup_orchestrator
+from scripts.cli_utils import print_banner, setup_orchestrator
 from src.infrastructure.database.sqlite_client import SQLiteClient
 from src.domain.models import Run, RunConfig
 from src.domain.stores.questionnaire_store import QuestionnaireStore

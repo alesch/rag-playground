@@ -34,15 +34,28 @@ complaila/
 │   │   ├── orchestration/               # Workflow management (Orchestrator)
 │   │   ├── runners/                     # Specialized execution flows
 │   │   └── evaluation/                  # RAG evaluation metrics and logic
-│   ├── experiments/                     # Research and performance tuning
-│   │   └── run_experiments.py
-│   └── utils/                           # Shared utilities
-│       └── cli.py
+│   └── experiments/                     # Research and performance tuning
+│       └── run_experiments.py
 ├── scripts/                             # CLI entry points
+│   ├── cli_utils.py                    # Shared utilities for CLI scripts
 │   ├── ask.py                          # Question answering CLI
 │   ├── tuning.py                       # Performance tuning (runs experiments)
 │   ├── run_evaluation.py               # Evaluation runner
 │   ├── ingest_corpus.py                # Data loading script
 │   └── ...                             # Other specialized scripts
-└── tests/                               # Test suite
+└── tests/                               # Test suite (mirrors src/)
+    ├── application/
+    │   ├── evaluation/
+    │   ├── orchestration/
+    │   └── runners/
+    ├── domain/
+    │   └── stores/
+    ├── infrastructure/
+    │   └── database/
+    ├── rag/
+    │   └── ingestion/
+    ├── experiments/
+    ├── data/                            # Test datasets and reference outputs
+    ├── conftest.py                      # Shared fixtures
+    └── mocks.py                         # Test mocks
 ```

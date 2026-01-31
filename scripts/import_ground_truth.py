@@ -51,7 +51,7 @@ def main():
         questions = q_store.get_questions(questionnaire_id)
 
     # 2. Parse NotebookLM output
-    notebook_path = Path("tests/output-notebookLM.md")
+    notebook_path = Path("tests/data/output-notebookLM.md")
     if not notebook_path.exists():
         print(f"Error: {notebook_path} not found.")
         return
