@@ -174,7 +174,7 @@ def print_results_summary(results, configs):
         config = next(c for c in configs if c.id == config_id)
         print(f"{config.name}:")
         print(f"  Mean Relevancy: {mean_relevancy:.4f}")
-        print(f"  Trials: {relevancies}")
+        print(f"  Trials: {[f'{r:.4f}' for r in relevancies]}")
         print()
     
     print(f"{'='*70}")
