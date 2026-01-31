@@ -28,6 +28,6 @@ Focus: Implement and automate RAG evaluation metrics.
 
 ## Implementation Plan
 
-1. **src/evaluation/metrics.py**: Pure functions for calculating metrics.
-2. **src/evaluation/evaluator.py**: Component to coordinate running questions through the RAG and computing metrics.
+1. **src/application/evaluation/metrics.py**: Pure functions for calculating metrics.
+2. **src/application/evaluation/evaluator.py**: Component to coordinate running questions through the RAG and computing metrics.
 3. **Evaluation CLI/Notebook**: Tools for users to run evaluations.

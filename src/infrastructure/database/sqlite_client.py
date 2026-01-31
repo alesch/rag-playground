@@ -9,8 +9,8 @@ import sqlite_vec
 import struct
 from typing import Dict, Any, List, Optional
 from src.config import SQLITE_DB_PATH, EMBEDDING_DIMENSIONS
-from src.database.base import VectorDatabaseClient, ChunkKey, ChunkRecord, SearchResult
-from src.ingestion.embedder import Embedding
+from src.infrastructure.database.base import VectorDatabaseClient, ChunkKey, ChunkRecord, SearchResult
+from src.rag.ingestion.embedder import Embedding
 
 
 class SQLiteClient(VectorDatabaseClient):

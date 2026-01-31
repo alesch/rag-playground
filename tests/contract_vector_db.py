@@ -3,8 +3,8 @@ Contract tests for VectorDatabaseClient implementations.
 """
 
 import pytest
-from src.database.base import ChunkRecord, ChunkKey
-from src.ingestion.embedder import generate_embedding, Embedding
+from src.infrastructure.database.base import ChunkRecord, ChunkKey
+from src.rag.ingestion.embedder import generate_embedding, Embedding
 
 class VectorDatabaseContract:
     """

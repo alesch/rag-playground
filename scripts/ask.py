@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from langchain_ollama import OllamaLLM
 from src.config import OLLAMA_BASE_URL, OLLAMA_CHAT_MODEL, SQLITE_DB_PATH
 from src.utils.cli import print_banner, setup_orchestrator
-from src.orchestration.orchestrator import Orchestrator
+from src.application.orchestration.orchestrator import Orchestrator
 
 
 # create_orchestrator removed in favor of setup_orchestrator from src.utils.cli

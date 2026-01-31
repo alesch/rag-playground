@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import MagicMock
-from src.evaluation.evaluator import RAGEvaluator
+from src.application.evaluation.evaluator import RAGEvaluator
 from src.domain.models import AnswerSuccess, Question
-from src.ingestion.embedder import Embedding
+from src.rag.ingestion.embedder import Embedding
 
 def test_evaluator_calculates_metrics_for_run():
     # Given

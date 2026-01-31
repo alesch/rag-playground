@@ -3,11 +3,11 @@ Shared pytest fixtures for all tests.
 """
 
 import pytest
-from src.ingestion.embedder import Embedding
-from src.database.supabase_client import ChunkKey, ChunkRecord
+from src.rag.ingestion.embedder import Embedding
+from src.infrastructure.database.supabase_client import ChunkKey, ChunkRecord
 
 
-from src.database.sqlite_client import SQLiteClient
+from src.infrastructure.database.sqlite_client import SQLiteClient
 from tests.mocks import MockLLM, fake_generate_embedding, fake_generate_embeddings
 
 
@@ -44,11 +44,11 @@ def mock_embeddings(monkeypatch):
     Use this fixture in tests that don't need real embeddings.
     """
     monkeypatch.setattr(
-        "src.ingestion.embedder.generate_embedding",
+        "src.rag.ingestion.embedder.generate_embedding",
         fake_generate_embedding
     )
     monkeypatch.setattr(
-        "src.ingestion.embedder.generate_embeddings",
+        "src.rag.ingestion.embedder.generate_embeddings",
         fake_generate_embeddings
     )
     # Also patch where it's imported in other modules
@@ -57,7 +57,7 @@ def mock_embeddings(monkeypatch):
         fake_generate_embeddings
     )
     monkeypatch.setattr(
-        "src.retrieval.retriever.generate_embedding",
+        "src.rag.retriever.generate_embedding",
         fake_generate_embedding
     )
 

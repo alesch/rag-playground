@@ -7,7 +7,7 @@ of frontmatter metadata.
 
 import pytest
 from pathlib import Path
-from src.ingestion.document_loader import load_document, load_corpus
+from src.rag.ingestion.document_loader import load_document, load_corpus
 
 
 def test_load_single_file_extracts_frontmatter():

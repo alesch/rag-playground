@@ -6,8 +6,8 @@ Tests the chunking of documents by markdown headers with context preservation.
 
 import pytest
 from pathlib import Path
-from src.ingestion.document_loader import load_document, Document
-from src.ingestion.chunker import chunk_document
+from src.rag.ingestion.document_loader import load_document, Document
+from src.rag.ingestion.chunker import chunk_document
 
 
 def test_split_document_into_chunks():

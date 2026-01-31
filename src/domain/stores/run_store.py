@@ -4,7 +4,7 @@ import json
 from typing import Optional
 
 from src.domain.models import Run, RunConfig, Answer, AnswerSuccess, AnswerFailure, RetrievedChunk, Citation, ChunkKey
-from src.database.sqlite_client import SQLiteClient
+from src.infrastructure.database.sqlite_client import SQLiteClient
 
 
 class RunStore:

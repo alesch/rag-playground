@@ -8,7 +8,7 @@
 
 ## Architecture
 
-### `scripts/run_experiments.py`
+### `src/experiments/run_experiments.py`
 
 **ExperimentRunner**
 - Takes: questionnaire_id, ground_truth_run_id, **orchestrator**, db_client

@@ -1,9 +1,9 @@
 """Questionnaire runner module."""
 
 from src.domain.models import Run, Answer, AnswerSuccess, AnswerFailure, Citation, ChunkKey
-from src.domain.questionnaire_store import QuestionnaireStore
-from src.domain.run_store import RunStore
-from src.generation.rag_system import RAGSystem
+from src.domain.stores.questionnaire_store import QuestionnaireStore
+from src.domain.stores.run_store import RunStore
+from src.rag.rag_system import RAGSystem
 
 
 class QuestionnaireRunner:

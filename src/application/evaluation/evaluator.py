@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Any, Callable
-from src.domain.run_store import RunStore
+from src.domain.stores.run_store import RunStore
 from src.domain.models import AnswerSuccess
-from src.ingestion.embedder import Embedding
-from src.evaluation.metrics import AnswerRelevancyMetric
+from src.rag.ingestion.embedder import Embedding
+from src.application.evaluation.metrics import AnswerRelevancyMetric
 
 @dataclass
 class QuestionResult:

@@ -5,9 +5,9 @@ Finds relevant document chunks for a given query using vector similarity.
 """
 
 from typing import List, Optional
-from src.database.factory import get_db_client
-from src.database.base import VectorDatabaseClient, SearchResult
-from src.ingestion.embedder import generate_embedding
+from src.infrastructure.database.factory import get_db_client
+from src.infrastructure.database.base import VectorDatabaseClient, SearchResult
+from src.rag.ingestion.embedder import generate_embedding
 
 
 class Retriever:

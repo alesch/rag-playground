@@ -20,15 +20,15 @@ from src.config import (
     LLM_TEMPERATURE, RETRIEVAL_TOP_K, SIMILARITY_THRESHOLD
 )
 from src.utils.cli import print_banner, setup_orchestrator
-from src.database.sqlite_client import SQLiteClient
+from src.infrastructure.database.sqlite_client import SQLiteClient
 from src.domain.models import Run, RunConfig
-from src.domain.questionnaire_store import QuestionnaireStore
-from src.domain.run_store import RunStore
-from src.domain.questionnaire_runner import QuestionnaireRunner
-from src.generation.rag_system import RAGSystem
-from src.evaluation.evaluator import RAGEvaluator
-from src.evaluation.evaluation_store import EvaluationStore
-from src.ingestion.embedder import generate_embedding
+from src.domain.stores.questionnaire_store import QuestionnaireStore
+from src.domain.stores.run_store import RunStore
+from src.application.runners.questionnaire_runner import QuestionnaireRunner
+from src.rag.rag_system import RAGSystem
+from src.application.evaluation.evaluator import RAGEvaluator
+from src.domain.stores.evaluation_store import EvaluationStore
+from src.rag.ingestion.embedder import generate_embedding
 
 def main():
     parser = argparse.ArgumentParser(description="Automated evaluation runner.")

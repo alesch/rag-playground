@@ -5,7 +5,7 @@ Base interface for vector database clients.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Dict, Any, Optional, List
-from src.ingestion.embedder import Embedding
+from src.rag.ingestion.embedder import Embedding
 from src.domain.models import ChunkKey
 
 

@@ -5,8 +5,8 @@ Tests database operations for storing document chunks with embeddings.
 """
 
 import pytest
-from src.database.supabase_client import SupabaseClient, ChunkRecord, ChunkKey
-from src.ingestion.embedder import generate_embedding
+from src.infrastructure.database.supabase_client import SupabaseClient, ChunkRecord, ChunkKey
+from src.rag.ingestion.embedder import generate_embedding
 
 pytestmark = pytest.mark.slow
 

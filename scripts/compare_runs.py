@@ -11,7 +11,7 @@ from pathlib import Path
 # Add project root to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.database.sqlite_client import SQLiteClient
+from src.infrastructure.database.sqlite_client import SQLiteClient
 from src.config import SQLITE_DB_PATH
 
 def main():

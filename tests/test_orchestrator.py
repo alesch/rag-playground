@@ -1,10 +1,10 @@
 """Tests for the Orchestrator component."""
 
 import pytest
-from src.orchestration.orchestrator import Orchestrator
-from src.generation.rag_system import GeneratedAnswer
-from src.database.supabase_client import ChunkKey, ChunkRecord
-from src.ingestion.embedder import Embedding
+from src.application.orchestration.orchestrator import Orchestrator
+from src.rag.rag_system import GeneratedAnswer
+from src.infrastructure.database.supabase_client import ChunkKey, ChunkRecord
+from src.rag.ingestion.embedder import Embedding
 
 
 class TestOrchestrator:

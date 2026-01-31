@@ -6,7 +6,7 @@ import pytest
 import os
 import tempfile
 from pathlib import Path
-from src.database.sqlite_client import SQLiteClient
+from src.infrastructure.database.sqlite_client import SQLiteClient
 from tests.contract_vector_db import VectorDatabaseContract
 
 class TestSQLiteClient(VectorDatabaseContract):

@@ -1,6 +1,6 @@
 import math
 from typing import List, Optional, Callable
-from src.ingestion.embedder import Embedding
+from src.rag.ingestion.embedder import Embedding
 
 
 class AnswerRelevancyMetric:

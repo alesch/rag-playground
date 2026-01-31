@@ -24,7 +24,7 @@
 
 ### Component 3: RunStore (SQL) ✅
 
-**Module**: `src/domain/run_store.py`
+**Module**: `src/domain/stores/run_store.py`
 **Test File**: `tests/test_run_store.py` & `tests/test_run_config.py`
 **Status**: All tests passing (8/8)
 

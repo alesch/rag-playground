@@ -7,7 +7,7 @@
 ---
 
 ## Component 1: Document Loader
-**Module**: `src/ingestion/document_loader.py`  
+**Module**: `src/rag/ingestion/document_loader.py`  
 **Test File**: `tests/test_document_loader.py`
 
 1. Load single markdown file and extract frontmatter fields (version, title, tags)
@@ -18,7 +18,7 @@
 ---
 
 ## Component 2: Chunker
-**Module**: `src/ingestion/chunker.py`  
+**Module**: `src/rag/ingestion/chunker.py`  
 **Test File**: `tests/test_chunker.py`
 
 1. Split document by markdown headers preserving context
@@ -30,7 +30,7 @@
 ---
 
 ## Component 3: Embedder
-**Module**: `src/ingestion/embedder.py`  
+**Module**: `src/rag/ingestion/embedder.py`  
 **Test File**: `tests/test_embedder.py`
 
 1. Generate 1024-dimensional embedding for text via Ollama
@@ -41,7 +41,7 @@
 ---
 
 ## Component 4: Supabase Client
-**Module**: `src/database/supabase_client.py`  
+**Module**: `src/infrastructure/database/supabase_client.py`  
 **Test File**: `tests/test_supabase_client.py`
 
 1. Initialize connection with credentials

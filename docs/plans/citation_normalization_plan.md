@@ -4,7 +4,7 @@
 
 ## 1. Schema Definition
 
-We will add a new table to the SQLite schema in `src/database/sqlite_client.py`.
+We will add a new table to the SQLite schema in `src/infrastructure/database/sqlite_client.py`.
 
 ### `citations` Table
 | Column | Type | Description |

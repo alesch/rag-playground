@@ -13,11 +13,11 @@ from typing import List
 # Add project root to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.ingestion.document_loader import load_document, load_corpus as load_corpus_documents, Document
-from src.ingestion.chunker import chunk_document, Chunk
-from src.ingestion.embedder import generate_embeddings, Embedding
-from src.database.factory import get_db_client
-from src.database.base import VectorDatabaseClient, ChunkKey, ChunkRecord
+from src.rag.ingestion.document_loader import load_document, load_corpus as load_corpus_documents, Document
+from src.rag.ingestion.chunker import chunk_document, Chunk
+from src.rag.ingestion.embedder import generate_embeddings, Embedding
+from src.infrastructure.database.factory import get_db_client
+from src.infrastructure.database.base import VectorDatabaseClient, ChunkKey, ChunkRecord
 
 
 @dataclass

@@ -3,12 +3,12 @@
 import pytest
 from unittest.mock import MagicMock
 from src.domain.models import Questionnaire, Question, Run, RunConfig, ChunkKey
-from src.domain.questionnaire_store import QuestionnaireStore
-from src.domain.run_store import RunStore
-from src.database.sqlite_client import SQLiteClient
-from src.generation.rag_system import GeneratedAnswer, Citation as GenCitation
-from src.evaluation.evaluation_store import EvaluationStore
-from scripts.run_experiments import ExperimentRunner
+from src.domain.stores.questionnaire_store import QuestionnaireStore
+from src.domain.stores.run_store import RunStore
+from src.infrastructure.database.sqlite_client import SQLiteClient
+from src.rag.rag_system import GeneratedAnswer, Citation as GenCitation
+from src.domain.stores.evaluation_store import EvaluationStore
+from src.experiments.run_experiments import ExperimentRunner
 
 
 @pytest.fixture
@@ -27,7 +27,7 @@ def mock_llm():
 @pytest.fixture
 def mock_rag_system(db_client, mock_llm):
     """Create a RAGSystem with mock LLM for testing."""
-    from src.generation.rag_system import RAGSystem
+    from src.rag.rag_system import RAGSystem
     return RAGSystem(
         client=db_client,
         llm=mock_llm,
@@ -150,8 +150,8 @@ class TestExperimentRunner:
         """Verify RAG system is called for each question and answers are saved."""
         # Given
         # Add a chunk to database so retrieval returns results
-        from src.database.supabase_client import ChunkRecord, ChunkKey
-        from src.ingestion.embedder import Embedding
+        from src.infrastructure.database.supabase_client import ChunkRecord, ChunkKey
+        from src.rag.ingestion.embedder import Embedding
         db_client.insert_chunk(ChunkRecord(
             key=ChunkKey("test-doc", "chunk1", 1),
             status="active",
@@ -206,8 +206,8 @@ class TestExperimentRunner:
         """Verify retry logic - fails 2 times then succeeds on 3rd attempt."""
         # Given
         # Add chunk so retrieval succeeds
-        from src.database.sqlite_client import ChunkRecord, ChunkKey
-        from src.ingestion.embedder import Embedding
+        from src.infrastructure.database.sqlite_client import ChunkRecord, ChunkKey
+        from src.rag.ingestion.embedder import Embedding
         db_client.insert_chunk(ChunkRecord(
             key=ChunkKey("test-doc", "chunk1", 1),
             status="active",
@@ -225,7 +225,7 @@ class TestExperimentRunner:
             "Answer 3",  # Q3 attempt 1 - success
         ]
         
-        from src.generation.rag_system import RAGSystem
+        from src.rag.rag_system import RAGSystem
         rag_system = RAGSystem(
             client=db_client,
             llm=mock_llm,
@@ -273,8 +273,8 @@ class TestExperimentRunner:
         """Run 2 configs × 2 trials = 4 experiments total."""
         # Given
         # Add chunk for retrieval
-        from src.database.sqlite_client import ChunkRecord, ChunkKey
-        from src.ingestion.embedder import Embedding
+        from src.infrastructure.database.sqlite_client import ChunkRecord, ChunkKey
+        from src.rag.ingestion.embedder import Embedding
         db_client.insert_chunk(ChunkRecord(
             key=ChunkKey("test-doc", "chunk1", 1),
             status="active",

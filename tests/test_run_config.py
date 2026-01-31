@@ -2,8 +2,8 @@
 
 import pytest
 from src.domain.models import Run, RunConfig, AnswerSuccess, RetrievedChunk, Citation, ChunkKey
-from src.domain.run_store import RunStore
-from src.database.sqlite_client import SQLiteClient
+from src.domain.stores.run_store import RunStore
+from src.infrastructure.database.sqlite_client import SQLiteClient
 
 @pytest.fixture
 def store():

@@ -5,9 +5,9 @@ from datetime import datetime
 from langchain_ollama import OllamaLLM
 from src.config import OLLAMA_BASE_URL
 from src.domain.models import Run, RunConfig, AnswerSuccess, AnswerFailure
-from src.evaluation.evaluator import RAGEvaluator
-from src.ingestion.embedder import generate_embedding
-from src.generation.rag_system import RAGSystem
+from src.application.evaluation.evaluator import RAGEvaluator
+from src.rag.ingestion.embedder import generate_embedding
+from src.rag.rag_system import RAGSystem
 
 # Retry configuration
 MAX_RETRIES = 3

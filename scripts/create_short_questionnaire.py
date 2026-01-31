@@ -11,10 +11,10 @@ from pathlib import Path
 # Add project root to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.database.sqlite_client import SQLiteClient
+from src.infrastructure.database.sqlite_client import SQLiteClient
 from src.domain.models import Questionnaire, Question, Run, RunConfig, AnswerSuccess
-from src.domain.questionnaire_store import QuestionnaireStore
-from src.domain.run_store import RunStore
+from src.domain.stores.questionnaire_store import QuestionnaireStore
+from src.domain.stores.run_store import RunStore
 from src.config import SQLITE_DB_PATH
 
 def main():

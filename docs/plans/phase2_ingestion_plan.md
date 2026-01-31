@@ -12,7 +12,7 @@ Build the document ingestion pipeline to load compliance documents, chunk them i
 - Define embedding model settings
 - Manage logging configuration
 
-### 2. Document Loader (`src/ingestion/document_loader.py`)
+### 2. Document Loader (`src/rag/ingestion/document_loader.py`)
 **Purpose**: Load markdown documents from filesystem
 - Read markdown files from `data/corpus/`
 - Extract revision number from markdown frontmatter (version field)
@@ -21,7 +21,7 @@ Build the document ingestion pipeline to load compliance documents, chunk them i
 - Return structured document objects
 - Raise error if version field missing in frontmatter
 
-### 3. Chunking Logic (`src/ingestion/chunker.py`)
+### 3. Chunking Logic (`src/rag/ingestion/chunker.py`)
 **Purpose**: Split documents into semantic chunks
 - **Markdown-aware chunking**: Split by headers while preserving context
 - **Chunk size**: ~500-1000 tokens per chunk
@@ -30,14 +30,14 @@ Build the document ingestion pipeline to load compliance documents, chunk them i
 - Generate unique chunk IDs
 - Preserve revision number in each chunk's metadata
 
-### 4. Embedding Pipeline (`src/ingestion/embedder.py`)
+### 4. Embedding Pipeline (`src/rag/ingestion/embedder.py`)
 **Purpose**: Generate vector embeddings using Ollama
 - Initialize Ollama embedding client (mxbai-embed-large)
 - Batch embedding generation for efficiency
 - Handle rate limiting and errors
 - Return 1024-dimensional vectors
 
-### 5. Supabase Client (`src/database/supabase_client.py`)
+### 5. Supabase Client (`src/infrastructure/database/supabase_client.py`)
 **Purpose**: Database operations for storing embeddings with revision management
 - Initialize Supabase connection
 - Insert chunks with embeddings, metadata, revision, and status

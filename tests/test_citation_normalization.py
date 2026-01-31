@@ -2,8 +2,8 @@
 
 import pytest
 from src.domain.models import Run, RunConfig, AnswerSuccess, Citation, ChunkKey, Questionnaire, Question
-from src.domain.run_store import RunStore
-from src.domain.questionnaire_store import QuestionnaireStore
+from src.domain.stores.run_store import RunStore
+from src.domain.stores.questionnaire_store import QuestionnaireStore
 
 @pytest.fixture
 def store(vector_db):

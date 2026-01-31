@@ -13,7 +13,7 @@
 ## TDD Implementation Order
 
 ### Component 1: QuestionnaireStore (5 tests)
-Module: `src/domain/questionnaire_store.py`
+Module: `src/domain/stores/questionnaire_store.py`
 
 1. Save and retrieve questionnaire by ID
 2. Save batch of questions with sequence
@@ -22,7 +22,7 @@ Module: `src/domain/questionnaire_store.py`
 5. Handle duplicate questionnaire ID (upsert or error)
 
 ### Component 2: RunStore (6 tests)
-Module: `src/domain/run_store.py`
+Module: `src/domain/stores/run_store.py`
 
 1. Create run with full config snapshot
 2. Save answer with retrieved chunks

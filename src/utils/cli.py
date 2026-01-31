@@ -5,9 +5,9 @@ Shared utilities for CLI scripts.
 from typing import Dict, Any, Tuple
 from langchain_ollama import OllamaLLM
 from src.config import OLLAMA_BASE_URL, SQLITE_DB_PATH
-from src.database.factory import get_db_client
-from src.database.base import VectorDatabaseClient
-from src.orchestration.orchestrator import Orchestrator
+from src.infrastructure.database.factory import get_db_client
+from src.infrastructure.database.base import VectorDatabaseClient
+from src.application.orchestration.orchestrator import Orchestrator
 
 def print_banner(title: str, config: Dict[str, Any]):
     """Print a formatted configuration banner."""

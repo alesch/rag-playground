@@ -5,9 +5,9 @@ Tests answer generation using retrieved chunks and LLM.
 """
 
 import pytest
-from src.generation.rag_system import RAGSystem, GeneratedAnswer
-from src.database.supabase_client import ChunkKey, ChunkRecord, SearchResult
-from src.ingestion.embedder import Embedding
+from src.rag.rag_system import RAGSystem, GeneratedAnswer
+from src.infrastructure.database.supabase_client import ChunkKey, ChunkRecord, SearchResult
+from src.rag.ingestion.embedder import Embedding
 
 
 class TestRAGSystem:

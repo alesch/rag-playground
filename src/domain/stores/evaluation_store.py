@@ -1,8 +1,8 @@
 """Storage for evaluation reports and metrics."""
 
 from typing import Optional, List
-from src.database.sqlite_client import SQLiteClient
-from src.evaluation.evaluator import EvaluationReport, QuestionResult
+from src.infrastructure.database.sqlite_client import SQLiteClient
+from src.application.evaluation.evaluator import EvaluationReport, QuestionResult
 
 
 class EvaluationStore:

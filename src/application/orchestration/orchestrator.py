@@ -8,7 +8,7 @@ Future LangGraph integration will add:
 """
 
 from typing import List
-from src.generation.rag_system import RAGSystem, GeneratedAnswer
+from src.rag.rag_system import RAGSystem, GeneratedAnswer
 
 
 class Orchestrator:

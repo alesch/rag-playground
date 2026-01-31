@@ -6,9 +6,9 @@ Uses retrieved chunks and LLM to generate answers with citations.
 
 from dataclasses import dataclass
 from typing import List, Optional, Union
-from src.database.base import VectorDatabaseClient, SearchResult
+from src.infrastructure.database.base import VectorDatabaseClient, SearchResult
 from src.domain.models import Citation, Question
-from src.retrieval.retriever import Retriever
+from src.rag.retriever import Retriever
 
 
 @dataclass

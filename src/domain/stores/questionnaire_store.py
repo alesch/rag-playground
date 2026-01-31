@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 from src.domain.models import Questionnaire, Question
-from src.database.sqlite_client import SQLiteClient
+from src.infrastructure.database.sqlite_client import SQLiteClient
 
 
 class QuestionnaireStore:

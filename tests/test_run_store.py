@@ -3,9 +3,9 @@
 import pytest
 
 from src.domain.models import Questionnaire, Question, Run, RunConfig, AnswerSuccess, RetrievedChunk, Citation, ChunkKey
-from src.domain.run_store import RunStore
-from src.domain.questionnaire_store import QuestionnaireStore
-from src.database.sqlite_client import SQLiteClient
+from src.domain.stores.run_store import RunStore
+from src.domain.stores.questionnaire_store import QuestionnaireStore
+from src.infrastructure.database.sqlite_client import SQLiteClient
 
 
 @pytest.fixture

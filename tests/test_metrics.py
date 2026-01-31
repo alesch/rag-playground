@@ -1,6 +1,6 @@
 import pytest
-from src.evaluation.metrics import calculate_precision, calculate_recall, calculate_mrr, AnswerRelevancyMetric
-from src.ingestion.embedder import Embedding
+from src.application.evaluation.metrics import calculate_precision, calculate_recall, calculate_mrr, AnswerRelevancyMetric
+from src.rag.ingestion.embedder import Embedding
 
 def test_calculate_precision_at_k():
     # Given

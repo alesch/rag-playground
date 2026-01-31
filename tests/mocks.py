@@ -2,7 +2,7 @@
 Mock implementations of external services for testing.
 """
 
-from src.ingestion.embedder import Embedding
+from src.rag.ingestion.embedder import Embedding
 
 
 def fake_generate_embedding(text: str) -> Embedding:

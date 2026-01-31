@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from typing import List
 import hashlib
 from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
-from src.ingestion.document_loader import Document
+from src.rag.ingestion.document_loader import Document
 
 
 @dataclass

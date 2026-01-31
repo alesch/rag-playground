@@ -62,7 +62,7 @@ Reorganize codebase based on dependencies, from innermost (domain) to outermost 
 
 **Location:** `src/experiments/` (or keep in `scripts/`)
 
-- `run_experiments.py` - Move from `scripts/run_experiments.py`
+- `run_experiments.py` - Move from `src/experiments/run_experiments.py`
 
 **Rule:** Uses everything. Top-level use case.
 

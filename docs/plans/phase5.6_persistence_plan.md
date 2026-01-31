@@ -8,11 +8,11 @@
 
 We will implement a `RelationalClient` (or extend `SQLiteClient`) to handle standard relational data, separating it from the Vector data if cleaner, or combining them since they share the same SQLite file (`complaila.db`).
 
-Given we already have `src/database/sqlite_client.py` managing the connection and file, we should extend it or create a companion repository layer.
+Given we already have `src/infrastructure/database/sqlite_client.py` managing the connection and file, we should extend it or create a companion repository layer.
 
 ### Data Schema (SQL)
 
-We will add these tables to `src/database/schema.sql`:
+We will add these tables to `src/infrastructure/database/schema.sql`:
 
 1.  **questionnaires**
     *   `id` TEXT PRIMARY KEY
@@ -50,8 +50,8 @@ We will add these tables to `src/database/schema.sql`:
 ## Implementation Plan
 
 ### Step 1: Database Initialization
-*   Update `src/database/schema.sql` (if it exists) or create it.
-*   Update `SQLiteClient` in `src/database/sqlite_client.py` to execute this schema on init.
+*   Update `src/infrastructure/database/schema.sql` (if it exists) or create it.
+*   Update `SQLiteClient` in `src/infrastructure/database/sqlite_client.py` to execute this schema on init.
 
 ### Step 2: Questionnaire Persistence
 *   Refactor `QuestionnaireStore` to take a `db_client` dependency.

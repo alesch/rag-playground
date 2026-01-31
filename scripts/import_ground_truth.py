@@ -2,10 +2,10 @@ import re
 from pathlib import Path
 from typing import Dict, List
 
-from src.database.sqlite_client import SQLiteClient
+from src.infrastructure.database.sqlite_client import SQLiteClient
 from src.domain.models import Run, RunConfig, AnswerSuccess
-from src.domain.questionnaire_store import QuestionnaireStore
-from src.domain.run_store import RunStore
+from src.domain.stores.questionnaire_store import QuestionnaireStore
+from src.domain.stores.run_store import RunStore
 from src.config import SQLITE_DB_PATH
 
 def parse_notebooklm_ground_truth(content: str) -> Dict[str, str]:

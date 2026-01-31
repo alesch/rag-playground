@@ -11,8 +11,8 @@ import json
 from supabase import create_client, Client
 from typing import Dict, Any, Optional, List, cast
 from src.config import SUPABASE_URL, SUPABASE_KEY, CHUNKS_TABLE
-from src.ingestion.embedder import Embedding
-from src.database.base import VectorDatabaseClient, ChunkKey, ChunkRecord, SearchResult
+from src.rag.ingestion.embedder import Embedding
+from src.infrastructure.database.base import VectorDatabaseClient, ChunkKey, ChunkRecord, SearchResult
 
 
 class SupabaseClient(VectorDatabaseClient):

@@ -5,7 +5,7 @@ Tests embedding text via Ollama using mxbai-embed-large model.
 """
 
 import pytest
-from src.ingestion.embedder import generate_embedding, generate_embeddings, Embedding
+from src.rag.ingestion.embedder import generate_embedding, generate_embeddings, Embedding
 
 
 def test_generate_embedding_via_ollama():
@@ -49,7 +49,7 @@ def test_raise_error_when_ollama_unavailable():
     text = "Test text for embedding."
     
     # Temporarily change to unreachable address to simulate Ollama being unavailable
-    import src.ingestion.embedder as embedder
+    import src.rag.ingestion.embedder as embedder
     original_url = embedder.OLLAMA_API_URL
     embedder.OLLAMA_API_URL = "http://127.0.0.1:9999/api/embeddings"  # Valid but unreachable port
     

@@ -13,7 +13,7 @@ Create a separate `Retriever` class that:
 ## Components
 
 ### 1. Retriever Module
-**Location**: `src/retrieval/retriever.py`
+**Location**: `src/rag/retriever.py`
 
 Responsibilities:
 - Accept natural language queries
@@ -21,7 +21,7 @@ Responsibilities:
 - Return ranked search results
 
 ### 2. Database Search Method
-**Location**: `src/database/supabase_client.py`
+**Location**: `src/infrastructure/database/supabase_client.py`
 
 Add vector similarity search using pgvector's cosine distance operator.
 
@@ -45,6 +45,6 @@ These behaviors live in SQL, not Python. Testing them in a mock would only test 
 ## Files to Create/Modify
 
 - `src/retrieval/__init__.py` - new
-- `src/retrieval/retriever.py` - new
-- `src/database/supabase_client.py` - add search method
+- `src/rag/retriever.py` - new
+- `src/infrastructure/database/supabase_client.py` - add search method
 - `tests/test_retriever.py` - new

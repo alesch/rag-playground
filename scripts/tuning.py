@@ -19,12 +19,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.config import OLLAMA_CHAT_MODEL, SQLITE_DB_PATH, OLLAMA_EMBEDDING_MODEL
-from src.database.sqlite_client import SQLiteClient
+from src.infrastructure.database.sqlite_client import SQLiteClient
 from src.domain.models import RunConfig
-from src.domain.questionnaire_store import QuestionnaireStore
-from src.domain.run_store import RunStore
-from src.evaluation.evaluation_store import EvaluationStore
-from scripts.run_experiments import ExperimentRunner
+from src.domain.stores.questionnaire_store import QuestionnaireStore
+from src.domain.stores.run_store import RunStore
+from src.domain.stores.evaluation_store import EvaluationStore
+from src.experiments.run_experiments import ExperimentRunner
 
 
 def create_experiment_configs():

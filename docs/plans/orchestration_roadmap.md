@@ -1,7 +1,7 @@
 # Orchestration Component Roadmap
 
 **Component**: Orchestrator
-**Module**: `src/orchestration/orchestrator.py`
+**Module**: `src/application/orchestration/orchestrator.py`
 **Test File**: `tests/test_orchestrator.py`
 **Status**: Planning
 
@@ -101,7 +101,7 @@ START → retrieve_node → generate_node → END
 
 ## Dependencies
 
-- Retriever: `src/retrieval/retriever.py` (complete)
+- Retriever: `src/rag/retriever.py` (complete)
 - Generator: `src/generation/generator.py` (complete)
 - LangGraph: `langgraph>=0.2.0` (installed)
 
