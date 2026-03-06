@@ -32,7 +32,7 @@
 - **LLM**: Ollama llama3.2 (or other local models like mistral, phi3)
 - **Framework**: LangChain + LangGraph
 - **Language**: Python 3.11+
-- **Development**: AAID (BDD + strict TDD guiding an AI coding agent) 
+- **Development**: [AAID](https://dev.to/dawiddahl/aaid-augmented-ai-development-50c9) (BDD + strict TDD guiding an AI coding agent) 
 - **Local LLM Runtime**: Ollama
 
 ## Success Criteria
