@@ -33,7 +33,7 @@
 - **Framework**: LangChain + LangGraph
 - **Language**: Python 3.11+
 - **Development**: AAID (BDD + strict TDD guiding an AI coding agent) 
-- **Local LLM Runtime**: Ollama (free, no API keys required)
+- **Local LLM Runtime**: Ollama
 
 ## Success Criteria
 
@@ -51,7 +51,6 @@
 
 **Deliverables**:
 - Complete codebase with documentation
-- 5 educational Jupyter notebooks
 - Demo corpus and sample questionnaire
 - Evaluation report with metrics
 
